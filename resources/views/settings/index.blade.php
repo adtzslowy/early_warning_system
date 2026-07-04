@@ -8,14 +8,19 @@
 
     <x-breadcrumb :items="[
         ['label' => 'Dashboard', 'href' => route('dashboard')],
-        ['label' => 'Setting Tampilan'],
+        ['label' => 'Setting'],
+        ['label' => 'Umum'],
     ]" />
 
     <x-page-header
-        title="Setting Tampilan"
-        description="Sesuaikan dashboard sesuai preferensimu — tersimpan di akunmu."
+        title="Setting"
+        description="Kelola tampilan dashboard dan profil akunmu."
     />
 
+    <div class="grid gap-6 lg:grid-cols-[200px_1fr]">
+        <aside>@include('partials.settings-nav')</aside>
+
+        <div class="space-y-6">
     @if (session('status'))
         <div class="rounded-lg border border-[color-mix(in_srgb,var(--color-aman)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-aman)_12%,transparent)] px-4 py-3 text-sm text-[var(--color-aman)]">
             {{ session('status') }}
@@ -86,5 +91,7 @@
             <x-button type="submit" variant="primary">Simpan Preferensi</x-button>
         </div>
     </form>
+        </div>
+    </div>
 </div>
 @endsection

@@ -8,7 +8,9 @@ use App\Support\DisplayPreferences;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 final class SettingsController extends Controller
@@ -53,5 +55,45 @@ final class SettingsController extends Controller
         return redirect()
             ->route('settings.edit')
             ->with('status', 'Preferensi tampilan tersimpan.');
+    }
+
+    public function profile(): View
+    {
+        return view('settings.profile', ['user' => Auth::user()]);
+    }
+
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Edit nama/email dimatikan dulu — form ini menangani foto & ganti password.
+        $validated = $request->validate([
+            'foto_profil' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'], // maks 2MB
+            'password' => ['nullable', 'confirmed', Password::min(8)],
+        ], [], [
+            'foto_profil' => 'foto profil',
+            'password' => 'password',
+        ]);
+
+        // Hapus foto lama bila diminta atau akan diganti.
+        if (($request->boolean('hapus_foto') || $request->hasFile('foto_profil')) && $user->foto_profil) {
+            Storage::disk('public')->delete($user->foto_profil);
+            $user->foto_profil = null;
+        }
+
+        if ($request->hasFile('foto_profil')) {
+            $user->foto_profil = $request->file('foto_profil')->store('foto-profil', 'public');
+        }
+
+        // Ganti password bila diisi (cast 'hashed' di model otomatis meng-hash).
+        if (! empty($validated['password'])) {
+            $user->password = $validated['password'];
+        }
+
+        $user->save();
+
+        return redirect()
+            ->route('settings.profile')
+            ->with('status', 'Profil berhasil diperbarui.');
     }
 }

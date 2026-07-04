@@ -13,7 +13,9 @@
       "Bash(grep -nA8 '\"dev\"' composer.json)",
       "Bash(python3 -c \"import json; json.load\\(open\\('composer.json'\\)\\); print\\('composer.json valid JSON ✓'\\)\")",
       "Bash(curl -s -o /tmp/p.html -w \"HTTP %{http_code}\\\\n\" \"http://127.0.0.1:8000/dashboard\")",
-      "WebSearch"
+      "WebSearch",
+      "Bash(test -f __TRACKED_VAR__/o-key.svg)",
+      "Bash(/Users/adit/.luna/bin/php -l app/Http/Controllers/SettingsController.php)"
     ]
   }
 }

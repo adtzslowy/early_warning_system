@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'preferences',
+        'foto_profil',
     ];
 
     /**
@@ -49,5 +50,25 @@ class User extends Authenticatable
             'password' => 'hashed',
             'preferences' => 'array',
         ];
+    }
+
+    /**
+     * URL publik foto profil (via storage link), atau null bila belum ada.
+     */
+    public function fotoUrl(): ?string
+    {
+        return $this->foto_profil ? asset('storage/' . $this->foto_profil) : null;
+    }
+
+    /**
+     * Inisial nama untuk avatar fallback (maks 2 huruf).
+     */
+    public function initials(): string
+    {
+        return \Illuminate\Support\Str::of($this->name)
+            ->explode(' ')
+            ->map(fn ($w) => \Illuminate\Support\Str::substr($w, 0, 1))
+            ->take(2)
+            ->implode('');
     }
 }
