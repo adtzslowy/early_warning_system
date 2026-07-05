@@ -49,11 +49,15 @@
                 @endif
 
                 @foreach ($section['items'] as $item)
+                    @php
+                        // Aktif bila route persis sama, atau turunannya (mis. devices.create / devices.edit).
+                        $active = request()->routeIs($item['route']) || request()->routeIs($item['route'].'.*');
+                    @endphp
                     <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
                         @class([
                             'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                            'bg-[var(--color-accent)]/10 text-[var(--color-accent)]' => request()->routeIs($item['route']),
-                            'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]' => ! request()->routeIs($item['route']),
+                            'bg-[var(--color-accent)]/10 text-[var(--color-accent)]' => $active,
+                            'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-2)] hover:text-[var(--color-text)]' => ! $active,
                         ])
                     >
                         <x-dynamic-component :component="$item['icon']" class="h-5 w-5 shrink-0" />
