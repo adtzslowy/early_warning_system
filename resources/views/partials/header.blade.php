@@ -20,7 +20,12 @@
             </button>
 
             <div>
-                <x-breadcrumb :items="[['label' => 'Dashboard', 'href' => route('dashboard')]]" />
+                {{-- Breadcrumb didefinisikan tiap halaman via @section('breadcrumb'); default ke Dashboard. --}}
+                @hasSection('breadcrumb')
+                    @yield('breadcrumb')
+                @else
+                    <x-breadcrumb :items="[['label' => 'Dashboard', 'href' => route('dashboard')]]" />
+                @endif
             </div>
         </div>
 

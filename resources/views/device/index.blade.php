@@ -3,6 +3,13 @@
 @section('title', 'Devices')
 @section('page-title', 'Devices')
 
+@section('breadcrumb')
+    <x-breadcrumb :items="[
+        ['label' => 'Dashboard', 'href' => route('dashboard')],
+        ['label' => 'Devices'],
+    ]" />
+@endsection
+
 @section('content')
 <div class="space-y-6"
     x-data="{
@@ -13,11 +20,6 @@
     }"
     @keydown.escape.window="confirm = false"
 >
-
-    <x-breadcrumb :items="[
-        ['label' => 'Dashboard', 'href' => route('dashboard')],
-        ['label' => 'Devices'],
-    ]" />
 
     <x-page-header
         title="Devices"

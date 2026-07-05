@@ -3,14 +3,16 @@
 @section('title', 'Setting Tampilan')
 @section('page-title', 'Setting Tampilan')
 
-@section('content')
-<div class="mx-auto space-y-6">
-
+@section('breadcrumb')
     <x-breadcrumb :items="[
         ['label' => 'Dashboard', 'href' => route('dashboard')],
         ['label' => 'Setting'],
         ['label' => 'Umum'],
     ]" />
+@endsection
+
+@section('content')
+<div class="mx-auto space-y-6">
 
     <x-page-header
         title="Setting"

@@ -3,14 +3,16 @@
 @section('title', 'Tambah Device')
 @section('page-title', 'Tambah Device')
 
-@section('content')
-<div class="mx-auto space-y-6">
-
+@section('breadcrumb')
     <x-breadcrumb :items="[
         ['label' => 'Dashboard', 'href' => route('dashboard')],
         ['label' => 'Devices', 'href' => route('devices')],
         ['label' => 'Tambah'],
     ]" />
+@endsection
+
+@section('content')
+<div class="mx-auto space-y-6">
 
     <x-page-header
         title="Tambah Device"
