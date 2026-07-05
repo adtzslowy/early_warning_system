@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -9,113 +9,121 @@
 
 /* ── Light theme (shadcn "neutral" base) ── */
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #ffffff;
-  --color-surface-2: #f5f5f5;
-  --color-muted: #f5f5f5;
-  --color-border: #e5e5e5;
-  --color-input: #e5e5e5;
-  --color-text: #0a0a0a;
-  --color-text-muted: #737373;
-  --color-accent: #171717;        /* shadcn primary = near-black di light */
-  --color-accent-foreground: #fafafa;
-  --color-ring: #a3a3a3;
-  --radius: 0.5rem;
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-2: #f5f5f5;
+    --color-muted: #f5f5f5;
+    --color-border: #e5e5e5;
+    --color-input: #e5e5e5;
+    --color-text: #0a0a0a;
+    --color-text-muted: #737373;
+    --color-accent: #171717; /* shadcn primary = near-black di light */
+    --color-accent-foreground: #fafafa;
+    --color-ring: #a3a3a3;
+    --radius: 0.5rem;
 }
 
 /* ── Dark theme (shadcn "neutral" dark) ── */
 .dark {
-  --color-bg: #0a0a0a;
-  --color-surface: #0a0a0a;
-  --color-surface-2: #171717;
-  --color-muted: #262626;
-  --color-border: #262626;
-  --color-input: #262626;
-  --color-text: #fafafa;
-  --color-text-muted: #a3a3a3;
-  --color-accent: #fafafa;        /* shadcn primary = near-white di dark */
-  --color-accent-foreground: #171717;
-  --color-ring: #737373;
+    --color-bg: #0a0a0a;
+    --color-surface: #0a0a0a;
+    --color-surface-2: #171717;
+    --color-muted: #262626;
+    --color-border: #262626;
+    --color-input: #262626;
+    --color-text: #fafafa;
+    --color-text-muted: #a3a3a3;
+    --color-accent: #fafafa; /* shadcn primary = near-white di dark */
+    --color-accent-foreground: #171717;
+    --color-ring: #737373;
 }
 
 @theme {
-  /* Warna status — FIXED, kode keselamatan, tidak ikut tema */
-  --color-aman: #22c55e;
-  --color-waspada: #eab308;
-  --color-siaga: #f97316;
-  --color-bahaya: #ef4444;
+    /* Warna status — FIXED, kode keselamatan, tidak ikut tema */
+    --color-aman: #22c55e;
+    --color-waspada: #eab308;
+    --color-siaga: #f97316;
+    --color-bahaya: #ef4444;
 
-  /* Tipografi — Geist (sans) untuk teks & heading, Geist Mono khusus
+    /* Tipografi — Geist (sans) untuk teks & heading, Geist Mono khusus
      angka/kode (font-mono) agar sejajar rapi di tabel & KPI. */
-  --font-display: "Geist", ui-sans-serif, sans-serif;
-  --font-body: "Geist", ui-sans-serif, sans-serif;
-  --font-dash: "Geist", ui-sans-serif, sans-serif;
-  --font-sans: "Geist", ui-sans-serif, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
+    --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
+    --font-body: "Space Grotesk", ui-sans-serif, sans-serif;
+    --font-dash: "Space Grotesk", ui-sans-serif, sans-serif;
+    --font-sans: "Space Grotesk", ui-sans-serif, sans-serif;
+    --font-mono: "Space Grotesk", ui-monospace, monospace;
 }
 
 @layer base {
-  * {
-    border-color: var(--color-border);
-  }
+    * {
+        border-color: var(--color-border);
+    }
 
-  /* Sembunyikan elemen Alpine sebelum diinisialisasi (cegah flash) */
-  [x-cloak] {
-    display: none !important;
-  }
+    /* Sembunyikan elemen Alpine sebelum diinisialisasi (cegah flash) */
+    [x-cloak] {
+        display: none !important;
+    }
 
-  body {
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-body);
-    transition: background-color 0.15s ease, color 0.15s ease;
-    /* Grid SCADA dilepas — shadcn look itu flat & bersih, bukan bertekstur */
-  }
+    body {
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-body);
+        transition:
+            background-color 0.15s ease,
+            color 0.15s ease;
+        /* Grid SCADA dilepas — shadcn look itu flat & bersih, bukan bertekstur */
+    }
 }
 
 @layer components {
-  /* Kartu ala shadcn: border tipis + shadow halus, bukan glassmorphism */
-  .card {
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  }
-
-  /* Water gauge tetap dipertahankan — ini signature domain kamu */
-  .water-gauge {
-    position: relative;
-    overflow: hidden;
-    background: color-mix(in srgb, var(--color-muted) 80%, transparent);
-    border: 1px solid var(--color-border);
-    border-radius: calc(var(--radius) - 0.125rem);
-  }
-
-  .water-gauge__fill {
-    position: absolute;
-    inset-inline: 0;
-    bottom: 0;
-    transition: height 0.6s ease-out;
-    background-color: color-mix(in srgb, currentColor 45%, transparent);
-  }
-
-  .status-pulse::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 9999px;
-    background: currentColor;
-    opacity: 0.6;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .status-pulse::after {
-      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    /* Kartu ala shadcn: border tipis + shadow halus, bukan glassmorphism */
+    .card {
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius);
+        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     }
-  }
 
-  @keyframes pulse-ring {
-    0% { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(2.2); opacity: 0; }
-  }
+    /* Water gauge tetap dipertahankan — ini signature domain kamu */
+    .water-gauge {
+        position: relative;
+        overflow: hidden;
+        background: color-mix(in srgb, var(--color-muted) 80%, transparent);
+        border: 1px solid var(--color-border);
+        border-radius: calc(var(--radius) - 0.125rem);
+    }
+
+    .water-gauge__fill {
+        position: absolute;
+        inset-inline: 0;
+        bottom: 0;
+        transition: height 0.6s ease-out;
+        background-color: color-mix(in srgb, currentColor 45%, transparent);
+    }
+
+    .status-pulse::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 9999px;
+        background: currentColor;
+        opacity: 0.6;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        .status-pulse::after {
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    }
+
+    @keyframes pulse-ring {
+        0% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+        100% {
+            transform: scale(2.2);
+            opacity: 0;
+        }
+    }
 }

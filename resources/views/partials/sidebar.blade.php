@@ -25,6 +25,13 @@
                 ['label' => 'Notification Log', 'route' => 'notifications.log', 'icon' => 'heroicon-o-bell'],
             ],
         ],
+
+        [
+            'group' => 'Administrasi',
+            'items' => [
+                ['label' => 'User Manajemen', 'route' => 'users', 'icon' => 'heroicon-o-users', 'can' => 'view users'],
+            ]
+        ],
     ];
 @endphp
 
@@ -50,8 +57,8 @@
 
                 @foreach ($section['items'] as $item)
                     @php
-                        // Aktif bila route persis sama, atau turunannya (mis. devices.create / devices.edit).
                         $active = request()->routeIs($item['route']) || request()->routeIs($item['route'].'.*');
+                        if (! empty($item['can']) && ! auth()->user()?->can($item['can'])) continue;
                     @endphp
                     <a href="{{ Route::has($item['route']) ? route($item['route']) : '#' }}"
                         @class([
