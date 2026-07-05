@@ -4,7 +4,7 @@
 @section('page-title', 'Tambah Device')
 
 @section('content')
-<div class="mx-auto max-w-3xl space-y-6">
+<div class="mx-auto space-y-6">
 
     <x-breadcrumb :items="[
         ['label' => 'Dashboard', 'href' => route('dashboard')],
