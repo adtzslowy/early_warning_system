@@ -7,7 +7,7 @@
     <title>@yield('title', 'Dashboard') · EWS Banjir Rob</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap"
         rel="stylesheet">
 
     {{-- Anti-flash: set class dark SEBELUM body dirender, biar nggak kedip --}}

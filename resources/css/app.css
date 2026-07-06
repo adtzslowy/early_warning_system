@@ -45,8 +45,7 @@
     --color-siaga: #f97316;
     --color-bahaya: #ef4444;
 
-    /* Tipografi — Geist (sans) untuk teks & heading, Geist Mono khusus
-     angka/kode (font-mono) agar sejajar rapi di tabel & KPI. */
+    /* Tipografi — Space Grotesk untuk teks, heading, & angka/kode. */
     --font-display: "Space Grotesk", ui-sans-serif, sans-serif;
     --font-body: "Space Grotesk", ui-sans-serif, sans-serif;
     --font-dash: "Space Grotesk", ui-sans-serif, sans-serif;

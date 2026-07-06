@@ -21,9 +21,18 @@ final class InferenceEngine
      */
     public function evaluate(FuzzyInput $input): array
     {
-        $waterDegrees = $this->fuzzify(fn (LinguisticTerm $t) => FuzzySetDefinition::waterLevel($t), $input->waterLevel);
-        $windDegrees = $this->fuzzify(fn (LinguisticTerm $t) => FuzzySetDefinition::onshoreWind($t), $input->onshoreWind);
-        $riseDegrees = $this->fuzzify(fn (LinguisticTerm $t) => FuzzySetDefinition::riseRate($t), $input->riseRate);
+        $waterDegrees = $this->fuzzify(
+            fn(LinguisticTerm $t) => FuzzySetDefinition::waterLevel($t),
+            $input->waterLevel,
+        );
+        $windDegrees = $this->fuzzify(
+            fn(LinguisticTerm $t) => FuzzySetDefinition::onshoreWind($t),
+            $input->onshoreWind,
+        );
+        $riseDegrees = $this->fuzzify(
+            fn(LinguisticTerm $t) => FuzzySetDefinition::riseRate($t),
+            $input->riseRate,
+        );
 
         $active = [];
 
@@ -35,7 +44,7 @@ final class InferenceEngine
             );
 
             if ($strength > 0.0) {
-                $active[] = ['rule' => $rule, 'strength' => $strength];
+                $active[] = ["rule" => $rule, "strength" => $strength];
             }
         }
 

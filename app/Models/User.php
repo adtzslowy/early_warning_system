@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -21,11 +22,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'preferences',
-        'foto_profil',
+        "name",
+        "email",
+        "password",
+        "preferences",
+        "foto_profil",
     ];
 
     /**
@@ -33,10 +34,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ["password", "remember_token"];
 
     /**
      * Get the attributes that should be cast.
@@ -46,9 +44,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'preferences' => 'array',
+            "email_verified_at" => "datetime",
+            "password" => "hashed",
+            "preferences" => "array",
         ];
     }
 
@@ -57,7 +55,9 @@ class User extends Authenticatable
      */
     public function fotoUrl(): ?string
     {
-        return $this->foto_profil ? asset('storage/' . $this->foto_profil) : null;
+        return $this->foto_profil
+            ? asset("storage/" . $this->foto_profil)
+            : null;
     }
 
     /**
@@ -66,9 +66,14 @@ class User extends Authenticatable
     public function initials(): string
     {
         return \Illuminate\Support\Str::of($this->name)
-            ->explode(' ')
-            ->map(fn ($w) => \Illuminate\Support\Str::substr($w, 0, 1))
+            ->explode(" ")
+            ->map(fn($w) => \Illuminate\Support\Str::substr($w, 0, 1))
             ->take(2)
-            ->implode('');
+            ->implode("");
+    }
+
+    public function devices(): BelongsToMany
+    {
+        return $this->belongsToMany(Device::class)->withTimestamps();
     }
 }

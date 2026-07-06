@@ -4,6 +4,7 @@ declare(stric_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Device;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -48,6 +49,7 @@ class UserController extends Controller
     {
         return view("users.create", [
             "roles" => Role::orderBy("name")->get(),
+            "devices" => Device::orderBy("name")->get(),
         ]);
     }
 
@@ -62,6 +64,7 @@ class UserController extends Controller
         ]);
 
         $user->syncRoles($data["role"]);
+        $user->devices()->sync($this->deviceIdsFor($data));
 
         return redirect()
             ->route("users")
@@ -70,15 +73,18 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        $user->load("devices");
+
         return view("users.edit", [
             "user" => $user,
             "roles" => Role::orderBy("name")->get(),
+            "devices" => Device::orderBy("name")->get(),
         ]);
     }
 
     public function update(Request $request, User $user)
     {
-        $data = $this->validated($request);
+        $data = $this->validated($request, $user);
 
         $user->name = $data["name"];
         $user->email = $data["email"];
@@ -89,6 +95,7 @@ class UserController extends Controller
 
         $user->save();
         $user->syncRoles($data["role"]);
+        $user->devices()->sync($this->deviceIdsFor($data));
 
         return redirect()
             ->route("users")
@@ -132,6 +139,8 @@ class UserController extends Controller
                     "confirmed",
                     Password::min(8),
                 ],
+                "devices" => ["array"],
+                "devices.*" => ["exists:devices,id"],
             ],
             [],
             [
@@ -141,5 +150,12 @@ class UserController extends Controller
                 "password" => "kata sandi",
             ],
         );
+    }
+
+    private function deviceIdsFor(array $data): array
+    {
+        return ($data["role"] ?? null) === "operator"
+            ? $data["devices"] ?? []
+            : [];
     }
 }

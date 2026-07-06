@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -18,22 +19,22 @@ class Device extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
-        'device_code',
-        'name',
-        'location',
-        'latitude',
-        'longitude',
-        'status',
-        'last_seen_at',
+        "device_code",
+        "name",
+        "location",
+        "latitude",
+        "longitude",
+        "status",
+        "last_seen_at",
     ];
 
     public function casts(): array
     {
         return [
-            'latitude' => 'decimal:7',
-            'longitude' => 'decimal:7',
-            'status' => DeviceStatus::class,
-            'last_seen_at' => 'datetime',
+            "latitude" => "decimal:7",
+            "longitude" => "decimal:7",
+            "status" => DeviceStatus::class,
+            "last_seen_at" => "datetime",
         ];
     }
 
@@ -48,7 +49,7 @@ class Device extends Model
      * */
     public function latestSensors(): HasMany
     {
-        return $this->hasMany(Sensor::class)->latest('recorded_at');
+        return $this->hasMany(Sensor::class)->latest("recorded_at");
     }
 
     public function latestWaterLevel(): HasOne
@@ -87,8 +88,8 @@ class Device extends Model
     private function latestSensorOfType(SensorType $type): HasOne
     {
         return $this->hasOne(Sensor::class)->ofMany(
-            ['recorded_at' => 'max', 'id' => 'max'],
-            fn (Builder $query) => $query->where('type', $type),
+            ["recorded_at" => "max", "id" => "max"],
+            fn(Builder $query) => $query->where("type", $type),
         );
     }
 
@@ -123,15 +124,15 @@ class Device extends Model
      */
     public function latestPredictionCurve(): \Illuminate\Support\Collection
     {
-        $latestRun = $this->predictions()->max('created_at');
+        $latestRun = $this->predictions()->max("created_at");
 
         if ($latestRun === null) {
             return collect();
         }
 
         return $this->predictions()
-            ->where('created_at', $latestRun)
-            ->orderBy('horizon_minutes')
+            ->where("created_at", $latestRun)
+            ->orderBy("horizon_minutes")
             ->get();
     }
 
@@ -149,8 +150,8 @@ class Device extends Model
     private function latestPredictionForHorizon(int $minutes): HasOne
     {
         return $this->hasOne(Prediction::class)->ofMany(
-            ['predicted_at' => 'max', 'id' => 'max'],
-            fn (Builder $query) => $query->where('horizon_minutes', $minutes),
+            ["predicted_at" => "max", "id" => "max"],
+            fn(Builder $query) => $query->where("horizon_minutes", $minutes),
         );
     }
 
@@ -166,8 +167,9 @@ class Device extends Model
 
     public function latestRiskEvaluation(): HasOne
     {
-        return $this->hasOne(RiskEvaluation::class)
-            ->latestOfMany('evaluated_at');
+        return $this->hasOne(RiskEvaluation::class)->latestOfMany(
+            "evaluated_at",
+        );
     }
 
     public function prediction(): HasMany
@@ -177,13 +179,21 @@ class Device extends Model
 
     public function prediction30(): HasOne
     {
-        return $this->hasOne(Prediction::class)->where('horizon_minutes', 30)->latestOfMany('predicted_at');
+        return $this->hasOne(Prediction::class)
+            ->where("horizon_minutes", 30)
+            ->latestOfMany("predicted_at");
     }
 
     public function prediction60(): HasOne
     {
         return $this->hasOne(Prediction::class)
-            ->where('horizon_minutes', 60)->latestOfMany('predicted_at');
+            ->where("horizon_minutes", 60)
+            ->latestOfMany("predicted_at");
+    }
+
+    public function operators(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 
     public function isOnline(): bool
