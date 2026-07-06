@@ -6,37 +6,23 @@ namespace App\Events;
 
 use App\Models\Device;
 use App\ValueObjects\PredictionResult;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Event internal: menandai kurva prediksi baru selesai dihitung & tersimpan.
+ * Bukan event broadcast — dashboard membaca prediksi dari DB saat load/ganti device.
+ * Disediakan sebagai titik-kait bila nanti perlu efek samping tambahan.
+ */
 class PredictionCompleted
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, SerializesModels;
 
     /**
-     * Create a new event instance.
-     *
      * @param  list<PredictionResult>  $predictions  Kurva prediksi terurut per horizon.
      */
     public function __construct(
         public readonly Device $device,
         public readonly array $predictions,
     ){}
-
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
-    }
 }

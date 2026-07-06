@@ -16,7 +16,7 @@ class DetectOfflineDevices extends Command
      *
      * @var string
      */
-    protected $signature = 'devices:detect-offile {--minutes=15}';
+    protected $signature = 'devices:detect-offline {--minutes=15}';
 
     /**
      * The console command description.
