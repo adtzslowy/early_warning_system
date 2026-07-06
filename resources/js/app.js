@@ -1,7 +1,18 @@
 import './bootstrap';
 import Alpine from 'alpinejs';
-import ApexCharts from 'apexcharts';
 
-window.ApexCharts = ApexCharts;
 window.Alpine = Alpine;
 Alpine.start();
+
+// ApexCharts (~450KB) dan Echo/pusher hanya dipakai di dashboard. Dimuat sebagai
+// chunk terpisah & async, sehingga:
+//  - halaman lain (login/welcome) tak menanggung bebannya & tak membuka WebSocket,
+//  - main bundle jauh lebih kecil → masuk dashboard terasa jauh lebih ringan.
+// Kode dashboard sudah menunggu window.ApexCharts (bootChart) & window.Echo
+// (connect) lewat retry, jadi aman dimuat menyusul.
+if (document.getElementById('telemetryChart') || document.getElementById('predictionChart')) {
+    import('apexcharts').then(({ default: ApexCharts }) => {
+        window.ApexCharts = ApexCharts;
+    });
+    import('./echo');
+}
