@@ -9,10 +9,7 @@
 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
     <div class="sm:col-span-2">
         <x-input label="Kode Device" name="device_code" value="{{ old('device_code', $device?->device_code) }}"
-            placeholder="mis. RTU-KTP-01" :error="$errors->first('device_code')" @if ($device)
-            readonly
-            @endif
-            />
+            placeholder="mis. RTU-KTP-01" :error="$errors->first('device_code')" :readonly="$device !== null" />
             @if ($device)
                 <p class="mt-1.5 text-xs text-[var(--color-text-muted)]">Kode tidak dapat diubah setelah dibuat.</p>
             @endif

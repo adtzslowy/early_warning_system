@@ -131,6 +131,9 @@ final class DeviceController extends Controller
                 "location" => ["nullable", "string", "max:255"],
                 "latitude" => ["nullable", "numeric", "between:-90,90"],
                 "longitude" => ["nullable", "numeric", "between:-180,180"],
+                "api_url" => ["nullable", "url", "max:2048"],
+                "api_key" => ["nullable", "string", "max:255"],
+                "api_enabled" => ["boolean"],
                 "status" => ["required", Rule::enum(DeviceStatus::class)],
             ],
             [

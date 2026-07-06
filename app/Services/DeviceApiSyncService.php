@@ -60,6 +60,7 @@ final class DeviceApiSyncService
         }
 
         $payload = $res->json('data') ?? $res->json() ?? [];
+        $payload = $this->extractDevicePayload($payload, $device);
 
         $dto = RobDevice::fromArray($device->device_code, $payload);
 
@@ -90,14 +91,33 @@ final class DeviceApiSyncService
             if ($previousStatus !== $device->status) {
                 event(new DeviceStatusChanged(
                     device: $device,
-                    previous: $previousStatus->value,
-                    current: $device->status->value,
+                    previous: $previousStatus,
+                    current: $device->status,
                 ));
             }
 
             event(new SensorDataSaved($device));
         });
         return true;
+    }
+
+    /**
+     * Ambil payload satu device dari respons API, mendukung dua bentuk:
+     *  1) datar          → { status, suhu, ketinggian_air, ... } (dipakai apa adanya)
+     *  2) terbungkus     → { devices: { kode: { ... } } } (gaya /api/rob)
+     *
+     * Untuk bentuk terbungkus, dicocokkan berdasarkan device_code; bila kode
+     * tak ada di payload, ambil entri pertama (dummy satu-device).
+     */
+    private function extractDevicePayload(array $payload, Device $device): array
+    {
+        if (isset($payload['devices']) && is_array($payload['devices'])) {
+            $devices = $payload['devices'];
+
+            return $devices[$device->device_code] ?? (reset($devices) ?: []);
+        }
+
+        return $payload;
     }
 
     private function markOffline(Device $device): void
@@ -111,8 +131,8 @@ final class DeviceApiSyncService
 
         event(new DeviceStatusChanged(
             device: $device,
-            previous: $previous->value,
-            current: DeviceStatus::Offline->value,
+            previous: $previous,
+            current: DeviceStatus::Offline,
         ));
     }
 }
