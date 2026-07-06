@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Builder;
 
 class Device extends Model
 {
@@ -194,6 +195,15 @@ class Device extends Model
     public function operators(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user)
+    {
+        if ($user->hasRole("admin")) {
+            return $query;
+        }
+
+        return $query->whereHas("operator", fn($q) => $q->whereKey($user->id));
     }
 
     public function isOnline(): bool
