@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Builder;
 
 class Device extends Model
 {
@@ -197,7 +196,7 @@ class Device extends Model
         return $this->belongsToMany(User::class)->withTimestamps();
     }
 
-    public function scopeVisibleTo(Builder $query, User $user)
+    public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->hasRole("admin")) {
             return $query;
