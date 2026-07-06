@@ -129,9 +129,13 @@
     (function () {
         // Dibuat `let` karena berubah saat ganti device tanpa reload.
         let SELECTED = @json($selectedCode);
-        const SNAPSHOT_URL = @json(route('dashboard.devices.snapshot', ['device' => $selectedCode]));
-        // URL detail per-device; __CODE__ diganti kode device saat berpindah.
+        // URL snapshot & detail per-device; __CODE__ diganti kode device aktif.
+        // Dibuat template (bukan URL beku) agar polling selalu mengikuti device terpilih.
+        const SNAPSHOT_URL_TEMPLATE = @json(route('dashboard.devices.snapshot', ['device' => '__CODE__']));
         const DETAIL_URL = @json(route('dashboard.devices.detail', ['device' => '__CODE__']));
+        function snapshotUrl() {
+            return SNAPSHOT_URL_TEMPLATE.replace('__CODE__', encodeURIComponent(SELECTED));
+        }
         let TELEMETRY_HISTORY = @json($selected['telemetry_history'] ?? []);
         let PREDICTION_CURVE = @json($selected['prediction_curve'] ?? []);
         let CURRENT_WATER = @json($selected['water_level'] ?? null);
@@ -514,9 +518,26 @@
             }
         }
 
+        // Perubahan status (online/offline) yang datang realtime lewat Reverb.
+        // Payload ringkas: hanya { device_code, status } — cukup untuk indikator status.
+        function applyStatusUpdate(e) {
+            const online = e.status === 'online';
+
+            const row = document.querySelector('tr[data-code="' + e.device_code + '"]');
+            if (row) {
+                const st = row.querySelector('[data-rt-status]');
+                if (st) { st.innerHTML = statusHTML(online); flash(st); }
+            }
+
+            if (e.device_code === SELECTED) {
+                const heroStatus = document.querySelector('[data-rt-status-hero]');
+                if (heroStatus) heroStatus.innerHTML = statusHTML(online);
+            }
+        }
+
         async function fetchSnapshot() {
             try {
-                const response = await fetch(SNAPSHOT_URL, {
+                const response = await fetch(snapshotUrl(), {
                     headers: { 'Accept': 'application/json' },
                     cache: 'no-store',
                 });
@@ -536,21 +557,36 @@
             initPredictionChart();
         })();
 
+        // Fallback polling: aktif hanya selama Reverb TIDAK tersambung, supaya
+        // dashboard tetap segar saat WebSocket putus (dan status offline tetap terlihat).
+        let reverbConnected = false;
+        const POLL_INTERVAL_MS = 20000;
+        setInterval(function () {
+            if (!reverbConnected) fetchSnapshot();
+        }, POLL_INTERVAL_MS);
+
         (function connect() {
             if (!window.Echo) { setTimeout(connect, 250); return; }
             setConnectionState('reverb ready', true);
             if (window.Echo.connector?.pusher?.connection) {
                 window.Echo.connector.pusher.connection.bind('connected', function () {
+                    reverbConnected = true;
                     setConnectionState('reverb live', true);
                 });
                 window.Echo.connector.pusher.connection.bind('disconnected', function () {
+                    reverbConnected = false;
                     setConnectionState('polling', false);
+                    fetchSnapshot(); // refresh segera, jangan tunggu tick berikutnya
                 });
                 window.Echo.connector.pusher.connection.bind('error', function () {
+                    reverbConnected = false;
                     setConnectionState('polling', false);
+                    fetchSnapshot();
                 });
             }
-            window.Echo.channel('rob-monitoring').listen('.device.risk.updated', applyUpdate);
+            window.Echo.channel('rob-monitoring')
+                .listen('.device.risk.updated', applyUpdate)
+                .listen('.device.status.changed', applyStatusUpdate);
         })();
 
         // ── Ganti device tanpa reload (in-place) ─────────────────────────────

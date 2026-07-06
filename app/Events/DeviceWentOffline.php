@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Events;
 
+use App\Enums\DeviceStatus;
 use App\Models\Device;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DeviceWentOffline
+class DeviceWentOffline implements ShouldBroadcastNow, ShouldDispatchAfterCommit
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -32,7 +32,23 @@ class DeviceWentOffline
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new Channel('rob-monitoring'),
+        ];
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'device.status.changed';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'device_code' => $this->device->device_code,
+            'status' => DeviceStatus::Offline->value,
         ];
     }
 }

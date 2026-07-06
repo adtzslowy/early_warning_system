@@ -8,15 +8,14 @@ use App\Enums\DeviceStatus;
 use App\Models\Device;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class DeviceStatusChanged
+class DeviceStatusChanged implements ShouldBroadcastNow, ShouldDispatchAfterCommit
 {
-    use Dispatchable;
+    use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
@@ -35,7 +34,23 @@ class DeviceStatusChanged
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('channel-name'),
+            new Channel('rob-monitoring'),
+        ];
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'device.status.changed';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'device_code' => $this->device->device_code,
+            'status' => $this->current->value,
         ];
     }
 }
