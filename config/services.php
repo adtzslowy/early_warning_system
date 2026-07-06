@@ -39,4 +39,19 @@ return [
         'base_url' => env('IOT_KETAPANG_URL'),
     ],
 
+    /*
+    | Data maritim BMKG (Prakiraan Cuaca Perairan). Dipakai oleh generator data
+    | sintetis (mock IoT untuk demo/skripsi) sebagai sinyal penggerak angin &
+    | gelombang. Atribusi sumber "BMKG" WAJIB dicantumkan.
+    |
+    | `perairan_url` = direktori file prakiraan per area; daftar area diambil
+    | dari `{parent}/perairan_list`. `area_code` = kode wilayah perairan
+    | (D.11 = Perairan Ketapang). Kosong = generator pakai baseline.
+    */
+    'bmkg' => [
+        'perairan_url' => env('BMKG_PERAIRAN_URL', 'https://peta-maritim.bmkg.go.id/public_api/perairan'),
+        'cache_ttl' => (int) env('BMKG_CACHE_TTL', 10800), // detik (3 jam)
+        'area_code' => env('BMKG_DEFAULT_AREA_CODE', ''),
+    ],
+
 ];

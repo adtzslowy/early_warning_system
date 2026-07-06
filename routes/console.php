@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\DetectOfflineDevices;
+use App\Console\Commands\RefreshBmkgMaritime;
 use App\Console\Commands\RefreshPredictions;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -24,5 +25,10 @@ Schedule::command("devices:poll")
 
 Schedule::command(RefreshPredictions::class)
     ->everyFifteenMinutes()
+    ->withoutOverlapping();
+
+// Hangatkan cache prakiraan maritim BMKG untuk generator data sintetis (demo).
+Schedule::command(RefreshBmkgMaritime::class)
+    ->hourly()
     ->withoutOverlapping();
 

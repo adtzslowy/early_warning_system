@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\MockRobController;
 use App\Http\Controllers\Authentication\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
@@ -10,6 +11,11 @@ use Illuminate\Support\Facades\Route;
 Route::get("/", function () {
     return view("welcome");
 });
+
+// Endpoint IoT TIRUAN (demo/skripsi) — publik & tanpa auth agar bisa di-poll
+// oleh RobSyncService seperti API IoT asli. Nonaktif di production (lihat
+// config/synthetic.php). Arahkan IOT_KETAPANG_URL ke sini HANYA untuk demo.
+Route::get("/api/mock/rob", MockRobController::class)->name("api.mock.rob");
 
 Route::prefix("sign-in")
     ->middleware("guest")
