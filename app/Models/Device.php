@@ -24,6 +24,9 @@ class Device extends Model
         "location",
         "latitude",
         "longitude",
+        "api_url",
+        "api_key",
+        "api_enabled",
         "status",
         "last_seen_at",
     ];
@@ -35,6 +38,8 @@ class Device extends Model
             "longitude" => "decimal:7",
             "status" => DeviceStatus::class,
             "last_seen_at" => "datetime",
+            "api_key" => "encrypted",
+            "api_enabled" => 'boolean',
         ];
     }
 

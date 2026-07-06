@@ -18,6 +18,10 @@ Schedule::command(DetectOfflineDevices::class, ['--minutes=15'])
     ->everyMinute()
     ->withoutOverlapping();
 
+Schedule::command("devices:poll")
+    ->everyMinute()
+    ->withoutOverlapping();
+
 Schedule::command(RefreshPredictions::class)
     ->everyFifteenMinutes()
     ->withoutOverlapping();

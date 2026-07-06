@@ -24,7 +24,7 @@
                     <x-button variant="outline" class="min-w-[13rem] justify-between">
                         <span class="flex items-center gap-2">
                             <x-status-dot :online="$selected['status'] === 'online'" :pulse="false" />
-                            <span class="truncate font-mono text-xs">{{ $selected['device_code'] }}</span>
+                            <span class="truncate font-mono text-xs" data-current-code>{{ $selected['device_code'] }}</span>
                         </span>
                         <x-heroicon-o-chevron-down class="h-4 w-4 opacity-60" />
                     </x-button>
@@ -34,6 +34,7 @@
                     @foreach ($deviceOptions as $option)
                         <a
                             href="{{ request()->fullUrlWithQuery(['device' => $option['device_code']]) }}"
+                            data-device-link="{{ $option['device_code'] }}"
                             @class([
                                 'flex items-center justify-between gap-2 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-[var(--color-surface-2)]',
                                 'bg-[var(--color-surface-2)]' => $option['device_code'] === $selectedCode,
@@ -51,177 +52,9 @@
         </x-slot:actions>
     </x-page-header>
 
-    {{-- Identitas alat terpilih --}}
-    <div class="flex flex-wrap items-center gap-3">
-        <h2 class="font-display text-xl font-bold tracking-tight">{{ $selected['name'] ?? $selected['device_code'] }}</h2>
-        <span data-rt-risk-hero><x-risk-badge :level="$selected['risk']->value" /></span>
+    <div id="device-detail">
+        @include('dashboard.partials.device-detail')
     </div>
-
-    {{-- KPI alat terpilih --}}
-    @if ($prefs['cards']['kpi_water'] || $prefs['cards']['kpi_rise'] || $prefs['cards']['kpi_onshore'] || $prefs['cards']['kpi_score'])
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        @if ($prefs['cards']['kpi_water'])
-        <div class="card p-6">
-            <div class="flex items-center justify-between gap-2">
-                <p class="text-sm font-medium text-[var(--color-text-muted)]">Ketinggian Air</p>
-                <span data-rt-risk-hero data-sm><x-risk-badge :level="$selected['risk']->value" size="sm" /></span>
-            </div>
-            <p class="mt-2 font-display text-3xl font-bold tracking-tight" data-rt-water-hero>
-                {{ $selected['water_level'] !== null ? number_format($selected['water_level'], 1) : '—' }}<span class="text-lg font-medium text-[var(--color-text-muted)]"> cm</span>
-            </p>
-            @php
-                $wl = $selected['water_level'];
-                $wlMax = 200;
-                $wlPercent = $wl !== null ? max(4, min(100, (($wlMax - $wl) / $wlMax) * 100)) : 0;
-            @endphp
-            <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-2)]">
-                <div class="h-full rounded-full transition-all duration-500" data-rt-waterbar style="width: {{ $wlPercent }}%; background-color: var(--color-{{ $selected['risk']->value }});"></div>
-            </div>
-            <p class="mt-1.5 text-xs text-[var(--color-text-muted)]">
-                {{ $wl !== null ? 'jarak sensor ke permukaan air' : 'data belum tersedia' }}
-            </p>
-        </div>
-        @endif
-
-        @if ($prefs['cards']['kpi_rise'])
-        <div class="card p-6">
-            <p class="text-sm font-medium text-[var(--color-text-muted)]">Laju Kenaikan</p>
-            <p class="mt-2 font-display text-3xl font-bold tracking-tight" data-rt-rise>{{ $selected['rise_rate'] !== null ? number_format($selected['rise_rate'], 2) : '—' }}<span class="text-lg font-medium text-[var(--color-text-muted)]"> cm/jam</span></p>
-            <p class="mt-1 text-xs text-[var(--color-text-muted)]">positif = air naik</p>
-        </div>
-        @endif
-
-        @if ($prefs['cards']['kpi_onshore'])
-        <div class="card p-6">
-            <p class="text-sm font-medium text-[var(--color-text-muted)]">Onshore Wind</p>
-            <p class="mt-2 font-display text-3xl font-bold tracking-tight" data-rt-onshore>{{ $selected['onshore_wind'] !== null ? number_format($selected['onshore_wind'], 2) : '—' }}<span class="text-lg font-medium text-[var(--color-text-muted)]"> m/s</span></p>
-            <p class="mt-1 text-xs text-[var(--color-text-muted)]">komponen angin ke darat</p>
-        </div>
-        @endif
-
-        @if ($prefs['cards']['kpi_score'])
-        <div class="card p-6">
-            <p class="text-sm font-medium text-[var(--color-text-muted)]">Skor Risiko</p>
-            <p class="mt-2 font-display text-3xl font-bold tracking-tight" data-rt-score>{{ $selected['risk_score'] !== null ? number_format($selected['risk_score'], 0) : '—' }}</p>
-            <p class="mt-1 text-xs text-[var(--color-text-muted)]">hasil fuzzy Mamdani</p>
-        </div>
-        @endif
-    </div>
-    @endif
-
-    {{-- Telemetri + Prediksi --}}
-    @if ($prefs['cards']['telemetry'] || $prefs['cards']['prediction'])
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        @if ($prefs['cards']['telemetry'])
-        <x-card title="Telemetri" subtitle="pembacaan sensor terbaru" :class="$prefs['cards']['prediction'] ? 'lg:col-span-2' : 'lg:col-span-3'">
-            @php
-                $telemetry = [
-                    ['temperature', 'Suhu', $selected['temperature'], '°C', 1],
-                    ['humidity', 'Kelembapan', $selected['humidity'], '%', 0],
-                    ['air_pressure', 'Tekanan Udara', $selected['air_pressure'], 'hPa', 1],
-                    ['wind_speed', 'Kec. Angin', $selected['wind_speed'], 'm/s', 1],
-                    ['wind_direction', 'Arah Angin', $selected['wind_direction'], '°', 0],
-                ];
-            @endphp
-
-            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex flex-wrap gap-2" role="tablist" aria-label="Pilih grafik telemetri">
-                    @foreach ($telemetry as [$key, $label, $value, $unit, $decimals])
-                        <button
-                            type="button"
-                            data-telemetry-tab="{{ $key }}"
-                            @class([
-                                'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition-colors',
-                                'border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-accent-foreground)]' => $key === $prefs['chart_metric'],
-                                'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)]' => $key !== $prefs['chart_metric'],
-                            ])
-                        >
-                            {{ $label }}
-                        </button>
-                    @endforeach
-                </div>
-
-                <div class="ml-auto flex items-center gap-2">
-                    <label for="rangeSelect" class="text-xs font-medium text-[var(--color-text-muted)]">Rentang</label>
-                    <select
-                        id="rangeSelect"
-                        data-range-select
-                        class="h-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 text-xs font-medium transition-colors hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
-                    >
-                        @foreach ([[60, '1 Jam'], [360, '6 Jam'], [1440, '24 Jam'], [0, 'Semua']] as [$mins, $rangeLabel])
-                            <option value="{{ $mins }}" @selected($mins === $prefs['chart_range'])>{{ $rangeLabel }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="min-h-[18rem]">
-                <div id="telemetryChart" class="h-72 w-full"></div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
-                @foreach ($telemetry as [$key, $label, $value, $unit, $decimals])
-                    <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4" data-telemetry-card="{{ $key }}">
-                        <p class="text-xs font-medium text-[var(--color-text-muted)]">{{ $label }}</p>
-                        <p class="mt-1.5 font-mono text-lg font-semibold" data-rt-telemetry="{{ $key }}" data-decimals="{{ $decimals }}">
-                            {{ $value !== null ? number_format($value, $decimals) : '—' }}<span class="text-xs text-[var(--color-text-muted)]"> {{ $unit }}</span>
-                        </p>
-                    </div>
-                @endforeach
-            </div>
-        </x-card>
-        @endif
-
-        @if ($prefs['cards']['prediction'])
-        <x-card title="Prediksi" subtitle="Prediksi kenaikan/penurunan muka air laut" :class="$prefs['cards']['telemetry'] ? '' : 'lg:col-span-3'">
-            @if (empty($selected['prediction_curve']))
-                <x-empty-state icon="chart" title="Prediksi belum aktif" message="Menunggu histori data cukup untuk regresi." />
-            @else
-                <div id="predictionChart" class="h-56 w-full"></div>
-
-                {{-- Strip forecast: tiap titik horizon, mirip prakiraan cuaca per jam --}}
-                <div class="-mx-2 mt-3 flex gap-2 overflow-x-auto overflow-y-hidden px-2 pb-1">
-                    @foreach ($selected['prediction_curve'] as $point)
-                        <div class="flex min-w-[4.25rem] shrink-0 flex-col items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 py-2 text-center">
-                            <span class="text-[10px] font-medium text-[var(--color-text-muted)]">+{{ $point['horizon'] }}m</span>
-                            <span class="mt-1 font-mono text-sm font-semibold">{{ number_format($point['value'], 1) }}</span>
-                            <span class="text-[10px] text-[var(--color-text-muted)]">{{ $point['at'] }}</span>
-                        </div>
-                    @endforeach
-                </div>
-                <p class="mt-2 text-[10px] text-[var(--color-text-muted)]">Nilai dalam cm · waktu WIB · diperbarui saat data sensor baru masuk</p>
-            @endif
-        </x-card>
-        @endif
-    </div>
-    @endif
-
-    {{-- Metadata --}}
-    @if ($prefs['cards']['info'])
-    <x-card title="Info Alat">
-        <dl class="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">
-            @php
-                $coords = $selected['latitude'] !== null && $selected['longitude'] !== null
-                    ? number_format($selected['latitude'], 5) . ', ' . number_format($selected['longitude'], 5)
-                    : '—';
-                $meta = [
-                    ['Kode', $selected['device_code']],
-                    ['Nama', $selected['name'] ?? '—'],
-                    ['Lokasi', $selected['location'] ?? '—'],
-                    ['Koordinat', $coords],
-                    ['Terakhir Online', $selected['last_seen_at'] ?? '—'],
-                    ['Terakhir Dievaluasi', $selected['evaluated_at'] ?? '—'],
-                ];
-            @endphp
-            @foreach ($meta as [$label, $value])
-                <div>
-                    <dt class="text-xs font-medium text-[var(--color-text-muted)]">{{ $label }}</dt>
-                    <dd class="mt-1 truncate text-sm">{{ $value }}</dd>
-                </div>
-            @endforeach
-        </dl>
-    </x-card>
-    @endif
 
     {{-- Tabel semua device --}}
     @if ($prefs['cards']['device_table'])
@@ -256,6 +89,8 @@
                             <td class="px-6 py-3 text-right">
                                 <a
                                     href="{{ request()->fullUrlWithQuery(['device' => $option['device_code']]) }}"
+                                    data-device-link="{{ $option['device_code'] }}"
+                                    data-action-link
                                     @class([
                                         'inline-flex h-8 items-center justify-center rounded-lg border px-3 text-xs font-medium transition-colors',
                                         'border-transparent bg-[var(--color-surface-2)] text-[var(--color-text)]' => $option['device_code'] === $selectedCode,
@@ -292,11 +127,14 @@
 
     <script>
     (function () {
-        const SELECTED = @json($selectedCode);
+        // Dibuat `let` karena berubah saat ganti device tanpa reload.
+        let SELECTED = @json($selectedCode);
         const SNAPSHOT_URL = @json(route('dashboard.devices.snapshot', ['device' => $selectedCode]));
-        const TELEMETRY_HISTORY = @json($selected['telemetry_history'] ?? []);
-        const PREDICTION_CURVE = @json($selected['prediction_curve'] ?? []);
-        const CURRENT_WATER = @json($selected['water_level'] ?? null);
+        // URL detail per-device; __CODE__ diganti kode device saat berpindah.
+        const DETAIL_URL = @json(route('dashboard.devices.detail', ['device' => '__CODE__']));
+        let TELEMETRY_HISTORY = @json($selected['telemetry_history'] ?? []);
+        let PREDICTION_CURVE = @json($selected['prediction_curve'] ?? []);
+        let CURRENT_WATER = @json($selected['water_level'] ?? null);
         const TELEMETRY_META = {
             temperature:    { label: 'Suhu', unit: '°C', decimals: 1, color: '#ef4444' },
             humidity:       { label: 'Kelembapan', unit: '%', decimals: 0, color: '#0ea5e9' },
@@ -714,6 +552,111 @@
             }
             window.Echo.channel('rob-monitoring').listen('.device.risk.updated', applyUpdate);
         })();
+
+        // ── Ganti device tanpa reload (in-place) ─────────────────────────────
+        // Ambil potongan HTML "detail device" dari server, tukar di tempat,
+        // bangun ulang chart lokal. Koneksi Reverb & aset TIDAK dimuat ulang.
+
+        function updateSelectionUI(code) {
+            // Label pada trigger dropdown.
+            const trigger = document.querySelector('[data-current-code]');
+            if (trigger) trigger.textContent = code;
+
+            // Highlight item di dropdown (link tanpa data-action-link).
+            document.querySelectorAll('[data-device-link]:not([data-action-link])').forEach(function (a) {
+                a.classList.toggle('bg-[var(--color-surface-2)]', a.dataset.deviceLink === code);
+            });
+
+            // Highlight baris tabel.
+            document.querySelectorAll('tr[data-code]').forEach(function (tr) {
+                tr.classList.toggle('bg-[var(--color-surface-2)]', tr.dataset.code === code);
+            });
+
+            // Tombol aksi tabel: teks + gaya "Dipilih" vs "Lihat".
+            document.querySelectorAll('[data-action-link]').forEach(function (a) {
+                const sel = a.dataset.deviceLink === code;
+                a.textContent = sel ? 'Dipilih' : 'Lihat';
+                a.classList.toggle('border-transparent', sel);
+                a.classList.toggle('bg-[var(--color-surface-2)]', sel);
+                a.classList.toggle('text-[var(--color-text)]', sel);
+                a.classList.toggle('border-[var(--color-border)]', !sel);
+                a.classList.toggle('bg-[var(--color-surface)]', !sel);
+                a.classList.toggle('hover:bg-[var(--color-surface-2)]', !sel);
+            });
+        }
+
+        let switching = false;
+        async function switchDevice(code, push) {
+            if (!code || code === SELECTED || switching) return;
+            switching = true;
+
+            const region = document.getElementById('device-detail');
+            if (region) region.style.opacity = '0.5';
+
+            try {
+                const res = await fetch(DETAIL_URL.replace('__CODE__', encodeURIComponent(code)), {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-store',
+                });
+                if (!res.ok) { window.location = '?device=' + encodeURIComponent(code); return; }
+
+                const data = await res.json();
+
+                // Buang chart lama (DOM-nya akan diganti innerHTML).
+                if (telemetryChart) { telemetryChart.destroy(); telemetryChart = null; }
+                if (predictionChart) { predictionChart.destroy(); predictionChart = null; }
+
+                region.innerHTML = data.html;
+
+                // Perbarui state modul.
+                SELECTED = data.code;
+                TELEMETRY_HISTORY = data.telemetry_history || {};
+                PREDICTION_CURVE = data.prediction_curve || [];
+                CURRENT_WATER = (data.water_level === undefined ? null : data.water_level);
+                lastSnapshotAt = null;
+
+                // Bangun ulang chart, lalu kembalikan pilihan tab & rentang yang aktif.
+                initTelemetryChart();
+                initPredictionChart();
+                selectTelemetry(activeTelemetry);
+                const rangeSel = document.querySelector('[data-range-select]');
+                if (rangeSel) rangeSel.value = String(activeRangeMinutes);
+
+                updateSelectionUI(data.code);
+
+                if (push !== false) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('device', data.code);
+                    history.pushState({ device: data.code }, '', url);
+                }
+            } catch (e) {
+                window.location = '?device=' + encodeURIComponent(code); // fallback: reload penuh
+            } finally {
+                if (region) region.style.opacity = '';
+                switching = false;
+            }
+        }
+
+        // Intersep klik pada semua link device (dropdown + tabel).
+        document.addEventListener('click', function (ev) {
+            const link = ev.target.closest('[data-device-link]');
+            if (!link) return;
+            ev.preventDefault();
+
+            // Tutup dropdown Alpine bila link berada di dalamnya.
+            const root = link.closest('[x-data]');
+            if (root && window.Alpine) {
+                try { const d = window.Alpine.$data(root); if (d && 'open' in d) d.open = false; } catch (_) {}
+            }
+
+            switchDevice(link.dataset.deviceLink, true);
+        });
+
+        // Tombol back/forward browser → ikut berpindah tanpa menambah histori.
+        window.addEventListener('popstate', function () {
+            const code = new URL(window.location.href).searchParams.get('device');
+            if (code && code !== SELECTED) switchDevice(code, false);
+        });
 
         // Muat data awal sekali; update selanjutnya datang realtime via Reverb.
         fetchSnapshot();

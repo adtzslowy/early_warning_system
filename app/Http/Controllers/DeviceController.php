@@ -60,6 +60,10 @@ final class DeviceController extends Controller
     {
         $data = $this->validated($request);
 
+        if (blank($data['api_key'] ?? null)) {
+            unset($data['api_key']);
+        }
+
         Device::create($data);
 
         return redirect()
@@ -81,6 +85,10 @@ final class DeviceController extends Controller
     public function update(Request $request, Device $device): RedirectResponse
     {
         $data = $this->validated($request, $device);
+
+        if (blank($data['api_key'] ?? null)) {
+            unset($data['api_key']);
+        }
 
         $device->update($data);
 

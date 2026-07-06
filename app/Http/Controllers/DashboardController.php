@@ -97,6 +97,48 @@ final class DashboardController extends Controller
     }
 
     /**
+     * Detail lengkap satu device untuk perpindahan tanpa reload halaman.
+     * Mengembalikan potongan HTML region "detail device" (dirender di server)
+     * + data mentah untuk chart, lalu ditukar via JS di dashboard.
+     */
+    public function detail(Request $request, Device $device): JsonResponse
+    {
+        abort_unless(
+            Device::query()
+                ->visibleTo($request->user())
+                ->whereKey($device->getKey())
+                ->exists(),
+            403,
+        );
+
+        $device->load([
+            "latestWaterLevel",
+            "latestTemperature",
+            "latestHumidity",
+            "latestAirPressure",
+            "latestWindSpeed",
+            "latestWindDirection",
+            "latestRiskEvaluation",
+        ]);
+
+        $selected = $this->toDeviceDetail($device);
+        $prefs = DisplayPreferences::forCurrentUser();
+
+        return response()->json([
+            "code" => $device->device_code,
+            "html" => view("dashboard.partials.device-detail", [
+                "selected" => $selected,
+                "prefs" => $prefs,
+            ])->render(),
+            "status" => $selected["status"],
+            "risk" => $selected["risk"]->value,
+            "water_level" => $selected["water_level"],
+            "telemetry_history" => $selected["telemetry_history"],
+            "prediction_curve" => $selected["prediction_curve"],
+        ]);
+    }
+
+    /**
      * Paginasi manual atas koleksi yang sudah dimuat (menghindari query kedua),
      * dengan query string (mis. ?device=) tetap terbawa di link paginasi.
      */

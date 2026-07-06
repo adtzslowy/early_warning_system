@@ -34,6 +34,10 @@ Route::prefix("dashboard")
             DashboardController::class,
             "snapshot",
         ])->name("dashboard.devices.snapshot");
+        Route::get("/devices/{device:device_code}/detail", [
+            DashboardController::class,
+            "detail",
+        ])->name("dashboard.devices.detail");
     });
 
 // Master Data — Devices (CRUD, dilindungi permission per aksi).
