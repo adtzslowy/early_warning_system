@@ -52,7 +52,7 @@
         </x-slot:actions>
     </x-page-header>
 
-    <div id="device-detail">
+    <div id="device-detail" class="space-y-6">
         @include('dashboard.partials.device-detail')
     </div>
 
