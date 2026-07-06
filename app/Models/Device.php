@@ -202,7 +202,7 @@ class Device extends Model
             return $query;
         }
 
-        return $query->whereHas("operator", fn($q) => $q->whereKey($user->id));
+        return $query->whereHas("operators", fn($q) => $q->whereKey($user->id));
     }
 
     public function isOnline(): bool
