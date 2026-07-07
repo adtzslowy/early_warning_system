@@ -116,7 +116,7 @@
     </x-card>
     @endif
 
-    {{-- Realtime via Reverb: update baris tabel + KPI device terpilih tanpa reload --}}
+    {{-- Update via polling snapshot: perbarui baris tabel + KPI device terpilih tanpa reload --}}
     <style>
         @keyframes rtFlash {
             0%   { background-color: color-mix(in srgb, var(--color-accent) 22%, transparent); }
@@ -518,23 +518,6 @@
             }
         }
 
-        // Perubahan status (online/offline) yang datang realtime lewat Reverb.
-        // Payload ringkas: hanya { device_code, status } — cukup untuk indikator status.
-        function applyStatusUpdate(e) {
-            const online = e.status === 'online';
-
-            const row = document.querySelector('tr[data-code="' + e.device_code + '"]');
-            if (row) {
-                const st = row.querySelector('[data-rt-status]');
-                if (st) { st.innerHTML = statusHTML(online); flash(st); }
-            }
-
-            if (e.device_code === SELECTED) {
-                const heroStatus = document.querySelector('[data-rt-status-hero]');
-                if (heroStatus) heroStatus.innerHTML = statusHTML(online);
-            }
-        }
-
         async function fetchSnapshot() {
             try {
                 const response = await fetch(snapshotUrl(), {
@@ -557,41 +540,14 @@
             initPredictionChart();
         })();
 
-        // Fallback polling: aktif hanya selama Reverb TIDAK tersambung, supaya
-        // dashboard tetap segar saat WebSocket putus (dan status offline tetap terlihat).
-        let reverbConnected = false;
+        // Polling snapshot: dashboard disegarkan berkala dari server (tanpa WebSocket).
         const POLL_INTERVAL_MS = 20000;
-        setInterval(function () {
-            if (!reverbConnected) fetchSnapshot();
-        }, POLL_INTERVAL_MS);
-
-        (function connect() {
-            if (!window.Echo) { setTimeout(connect, 250); return; }
-            setConnectionState('reverb ready', true);
-            if (window.Echo.connector?.pusher?.connection) {
-                window.Echo.connector.pusher.connection.bind('connected', function () {
-                    reverbConnected = true;
-                    setConnectionState('reverb live', true);
-                });
-                window.Echo.connector.pusher.connection.bind('disconnected', function () {
-                    reverbConnected = false;
-                    setConnectionState('polling', false);
-                    fetchSnapshot(); // refresh segera, jangan tunggu tick berikutnya
-                });
-                window.Echo.connector.pusher.connection.bind('error', function () {
-                    reverbConnected = false;
-                    setConnectionState('polling', false);
-                    fetchSnapshot();
-                });
-            }
-            window.Echo.channel('rob-monitoring')
-                .listen('.device.risk.updated', applyUpdate)
-                .listen('.device.status.changed', applyStatusUpdate);
-        })();
+        setConnectionState('polling', true);
+        setInterval(fetchSnapshot, POLL_INTERVAL_MS);
 
         // ── Ganti device tanpa reload (in-place) ─────────────────────────────
         // Ambil potongan HTML "detail device" dari server, tukar di tempat,
-        // bangun ulang chart lokal. Koneksi Reverb & aset TIDAK dimuat ulang.
+        // bangun ulang chart lokal. Aset TIDAK dimuat ulang.
 
         function updateSelectionUI(code) {
             // Label pada trigger dropdown.
@@ -694,7 +650,7 @@
             if (code && code !== SELECTED) switchDevice(code, false);
         });
 
-        // Muat data awal sekali; update selanjutnya datang realtime via Reverb.
+        // Muat data awal sekali; update selanjutnya datang lewat polling berkala.
         fetchSnapshot();
     })();
     </script>
