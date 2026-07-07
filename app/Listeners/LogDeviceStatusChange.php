@@ -30,6 +30,6 @@ class LogDeviceStatusChange
             'current' => $event->current->value,
         ]);
 
-        // TODO: trigger Notification Telegram + broadcast Reverb di sini nanti.
+        // TODO: trigger Notification Telegram di sini nanti.
     }
 }

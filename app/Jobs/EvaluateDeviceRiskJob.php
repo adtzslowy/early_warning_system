@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Enums\SensorType;
-use App\Events\DeviceRiskUpdated;
 use App\Fuzzy\Engine\FuzzyMamdaniEngine;
 use App\Models\Device;
 use App\Models\RiskEvaluation;
@@ -59,7 +58,7 @@ final class EvaluateDeviceRiskJob implements ShouldQueue
             riseRate: $riseRateForRisk,
         ));
 
-        $evaluation = RiskEvaluation::query()->create([
+        RiskEvaluation::query()->create([
             'device_id' => $this->device->id,
             'risk_level' => $result->level,
             'risk_score' => $result->score,
@@ -68,8 +67,6 @@ final class EvaluateDeviceRiskJob implements ShouldQueue
             'rise_rate' => $riseRate,
             'evaluated_at' => now(),
         ]);
-
-        event(new DeviceRiskUpdated($this->device, $evaluation));
     }
 
     private function latest(SensorType $type): ?Sensor
