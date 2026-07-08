@@ -502,6 +502,18 @@
                 const heroStatus = document.querySelector('[data-rt-status-hero]');
                 if (heroStatus) heroStatus.innerHTML = statusHTML(online);
 
+                // ── Kartu Prediksi ikut polling. Kurva forecast di-refresh dari
+                // server (diperbarui background tiap 15 mnt) DAN jangkar "sekarang"
+                // mengikuti ketinggian air live, jadi awal garis bergerak realtime.
+                if (e.water_level !== undefined) CURRENT_WATER = e.water_level;
+                if (e.prediction_curve) PREDICTION_CURVE = e.prediction_curve;
+                if (predictionChart) {
+                    predictionChart.updateSeries(predictionSeries(), true);
+                } else if (PREDICTION_CURVE.length) {
+                    // Chart belum sempat dibuat (tak ada data saat load) — buat sekarang.
+                    initPredictionChart();
+                }
+
                 // ── Turunan evaluasi fuzzy: hanya berubah saat ADA evaluasi baru.
                 // Diikat ke evaluated_at agar tidak dobel-proses & titik grafik
                 // telemetri tidak menumpuk di timestamp yang sama.

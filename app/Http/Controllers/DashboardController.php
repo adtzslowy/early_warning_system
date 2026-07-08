@@ -282,6 +282,7 @@ final class DashboardController extends Controller
             "wind_direction" => $this->floatOrNull(
                 $device->latestWindDirection?->value,
             ),
+            "prediction_curve" => $this->predictionCurve($device),
             "evaluated_at" => $evaluation?->evaluated_at?->toIso8601String(),
         ];
     }
