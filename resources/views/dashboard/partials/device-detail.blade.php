@@ -133,7 +133,7 @@
                 <div id="predictionChart" class="h-56 w-full"></div>
 
                 {{-- Strip forecast: tiap titik horizon, mirip prakiraan cuaca per jam --}}
-                <div class="-mx-2 mt-3 flex gap-2 overflow-x-auto overflow-y-hidden px-2 pb-1">
+                <div data-rt-forecast class="-mx-2 mt-3 flex gap-2 overflow-x-auto overflow-y-hidden px-2 pb-1">
                     @foreach ($selected['prediction_curve'] as $point)
                         <div class="flex min-w-[4.25rem] shrink-0 flex-col items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 py-2 text-center">
                             <span class="text-[10px] font-medium text-[var(--color-text-muted)]">+{{ $point['horizon'] }}m</span>
