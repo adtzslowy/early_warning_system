@@ -139,12 +139,14 @@
         let TELEMETRY_HISTORY = @json($selected['telemetry_history'] ?? []);
         let PREDICTION_CURVE = @json($selected['prediction_curve'] ?? []);
         let CURRENT_WATER = @json($selected['water_level'] ?? null);
+        // minSpan = rentang-Y minimum (satuan metrik) yg selalu ditampilkan, agar
+        // perubahan kecil tak terlihat curam. floorZero/cap = batas fisik metrik.
         const TELEMETRY_META = {
-            temperature:    { label: 'Suhu', unit: '°C', decimals: 1, color: '#ef4444' },
-            humidity:       { label: 'Kelembapan', unit: '%', decimals: 0, color: '#0ea5e9' },
-            air_pressure:   { label: 'Tekanan Udara', unit: 'hPa', decimals: 1, color: '#8b5cf6' },
-            wind_speed:     { label: 'Kecepatan Angin', unit: 'm/s', decimals: 1, color: '#22c55e' },
-            wind_direction: { label: 'Arah Angin', unit: '°', decimals: 0, color: '#f97316' },
+            temperature:    { label: 'Suhu', unit: '°C', decimals: 1, color: '#ef4444', minSpan: 4 },
+            humidity:       { label: 'Kelembapan', unit: '%', decimals: 0, color: '#0ea5e9', minSpan: 20, floorZero: true, cap: 100 },
+            air_pressure:   { label: 'Tekanan Udara', unit: 'hPa', decimals: 1, color: '#8b5cf6', minSpan: 8 },
+            wind_speed:     { label: 'Kecepatan Angin', unit: 'm/s', decimals: 1, color: '#22c55e', minSpan: 6, floorZero: true },
+            wind_direction: { label: 'Arah Angin', unit: '°', decimals: 0, color: '#f97316', minSpan: 120, floorZero: true, cap: 360 },
         };
         const RISK = {
             aman:    { label: 'Aman',    c: 'var(--color-aman)' },
@@ -233,6 +235,7 @@
             activeRangeMinutes = minutes;
 
             if (telemetryChart) {
+                telemetryChart.updateOptions({ yaxis: telemetryYAxis(activeTelemetry) }, false, false);
                 telemetryChart.updateSeries(telemetrySeries(activeTelemetry), true);
             }
         }
@@ -260,13 +263,7 @@
                         colors: [meta.color],
                         strokeColors: 'var(--color-surface)',
                     },
-                    yaxis: {
-                        labels: {
-                            formatter: function (value) {
-                                return fmt(value, meta.decimals);
-                            },
-                        },
-                    },
+                    yaxis: telemetryYAxis(key),
                     tooltip: {
                         y: {
                             formatter: function (value) {
@@ -277,6 +274,39 @@
                 }, false, false);
                 telemetryChart.updateSeries(telemetrySeries(key), true);
             }
+        }
+
+        // Sumbu-Y "tenang" + label kiri konsisten dgn metrik aktif. Beri ruang
+        // minimum (minSpan) agar perubahan kecil (mis. suhu 29.7 → 29.3) tampil
+        // landai, dgn 50% padding di atas rentang data bila datanya lebih lebar.
+        function telemetryYAxis(key) {
+            const meta = TELEMETRY_META[key] || TELEMETRY_META.temperature;
+            const y = {
+                tickAmount: 4,
+                labels: {
+                    style: { colors: 'var(--color-text-muted)' },
+                    formatter: function (value) { return fmt(value, meta.decimals); },
+                },
+            };
+
+            const data = telemetrySeries(key)[0].data;
+            if (!data.length) return y;
+
+            let lo = Infinity, hi = -Infinity;
+            data.forEach(function (p) { if (p[1] < lo) lo = p[1]; if (p[1] > hi) hi = p[1]; });
+
+            const mid = (lo + hi) / 2;
+            const span = Math.max(meta.minSpan, (hi - lo) * 1.5);
+            let min = mid - span / 2;
+            let max = mid + span / 2;
+
+            // Jaga dalam batas fisik metrik (mis. arah angin 0–360, tak negatif).
+            if (meta.cap !== undefined && max > meta.cap) { min -= (max - meta.cap); max = meta.cap; }
+            if (meta.floorZero && min < 0) { min = 0; }
+
+            y.min = min;
+            y.max = max;
+            return y;
         }
 
         function initTelemetryChart() {
@@ -296,11 +326,11 @@
                 colors: [meta.color],
                 stroke: { width: 2.5, curve: 'smooth' },
                 markers: {
-                    size: 4,
+                    size: 0,
                     strokeWidth: 2,
                     colors: [meta.color],
                     strokeColors: 'var(--color-surface)',
-                    hover: { size: 7 },
+                    hover: { size: 5 },
                 },
                 fill: {
                     type: 'gradient',
@@ -322,14 +352,7 @@
                     axisBorder: { color: 'var(--color-border)' },
                     axisTicks: { color: 'var(--color-border)' },
                 },
-                yaxis: {
-                    labels: {
-                        style: { colors: 'var(--color-text-muted)' },
-                        formatter: function (value) {
-                            return fmt(value, meta.decimals);
-                        },
-                    },
-                },
+                yaxis: telemetryYAxis(activeTelemetry),
                 tooltip: {
                     theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
                     x: { format: 'HH:mm' },
@@ -362,17 +385,26 @@
         }
 
         function predictionSeries() {
+            const now = Date.now();
             const points = [];
 
             // Titik jangkar "sekarang" dari pembacaan air terbaru, supaya kurva
             // menyambung dari kondisi aktual ke proyeksi ke depan (gaya forecast).
             if (CURRENT_WATER !== null && CURRENT_WATER !== undefined) {
-                points.push([Date.now(), Number(CURRENT_WATER)]);
+                points.push([now, Number(CURRENT_WATER)]);
             }
 
+            // Hanya horizon yang MASIH di masa depan. Prediksi di-refresh tiap
+            // 15 mnt dgn timestamp absolut, jadi seiring waktu berjalan horizon
+            // awal (+15m/+30m) bisa sudah TERLEWAT — kalau tetap digambar, garis
+            // berbalik ke kiri & "menjorok" (lonjakan tajam di awal kurva).
             PREDICTION_CURVE.forEach(function (p) {
-                points.push([p.at_ts, Number(p.value)]);
+                if (p.at_ts > now) points.push([p.at_ts, Number(p.value)]);
             });
+
+            // Urutkan menaik: sumbu datetime ApexCharts menggambar sesuai urutan
+            // array (tidak auto-sort), jadi ini kunci mencegah garis zigzag.
+            points.sort(function (a, b) { return a[0] - b[0]; });
 
             return [{ name: 'Prediksi', data: points }];
         }
@@ -458,6 +490,7 @@
             TELEMETRY_HISTORY[key] = series.slice(-120);
 
             if (key === activeTelemetry && telemetryChart) {
+                telemetryChart.updateOptions({ yaxis: telemetryYAxis(key) }, false, false);
                 telemetryChart.updateSeries(telemetrySeries(key), true);
             }
         }
