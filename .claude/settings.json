@@ -18,7 +18,8 @@
       "Bash(/Users/adit/.luna/bin/php -l app/Http/Controllers/SettingsController.php)",
       "Bash(~/.luna/bin/php /usr/local/bin/composer remove laravel/reverb --no-interaction)",
       "Bash(~/.luna/bin/php artisan *)",
-      "Bash(git ls-remote *)"
+      "Bash(git ls-remote *)",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }

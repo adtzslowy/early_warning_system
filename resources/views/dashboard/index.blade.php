@@ -323,7 +323,7 @@
                 },
                 series: telemetrySeries(activeTelemetry),
                 colors: [meta.color],
-                stroke: { width: 2.5, curve: 'smooth', lineCap: 'round' },
+                stroke: { width: 2.5, curve: 'monotoneCubic', lineCap: 'round' },
                 markers: {
                     size: 0,
                     strokeWidth: 2,
@@ -408,15 +408,21 @@
         }
 
         function predictionSeries() {
+            const now = Date.now();
+            // Hanya proyeksi KE DEPAN. Horizon yang sudah lewat (mis. prediksi
+            // basi karena pipeline telat) dibuang, supaya tidak muncul jurang
+            // waktu kosong yang bikin kurva melenceng jauh dari nilai sebenarnya.
+            const future = PREDICTION_CURVE.filter(function (p) { return p.at_ts >= now; });
             const points = [];
 
-            // Titik jangkar "sekarang" dari pembacaan air terbaru, supaya kurva
-            // menyambung dari kondisi aktual ke proyeksi ke depan (gaya forecast).
-            if (CURRENT_WATER !== null && CURRENT_WATER !== undefined) {
-                points.push([Date.now(), Number(CURRENT_WATER)]);
+            // Jangkar "sekarang" dari pembacaan air terbaru dipasang HANYA bila
+            // masih ada proyeksi ke depan — agar garis menyambung dari kondisi
+            // aktual, bukan melompati jurang saat prediksi sudah kedaluwarsa.
+            if (future.length && CURRENT_WATER !== null && CURRENT_WATER !== undefined) {
+                points.push([now, Number(CURRENT_WATER)]);
             }
 
-            PREDICTION_CURVE.forEach(function (p) {
+            future.forEach(function (p) {
                 points.push([p.at_ts, Number(p.value)]);
             });
 
@@ -438,7 +444,7 @@
                 },
                 series: predictionSeries(),
                 colors: [accent],
-                stroke: { width: 2.5, curve: 'smooth', lineCap: 'round', dashArray: 5 },
+                stroke: { width: 2.5, curve: 'monotoneCubic', lineCap: 'round', dashArray: 5 },
                 markers: {
                     size: 0,
                     strokeWidth: 2,
@@ -485,6 +491,12 @@
                             return fmt(value, 1) + ' cm';
                         },
                     },
+                },
+                noData: {
+                    text: 'Prediksi kedaluwarsa — menunggu pembaruan',
+                    align: 'center',
+                    verticalAlign: 'middle',
+                    style: { color: 'var(--color-text-muted)' },
                 },
             });
 
