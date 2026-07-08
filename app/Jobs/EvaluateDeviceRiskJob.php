@@ -50,6 +50,9 @@ final class EvaluateDeviceRiskJob implements ShouldQueue
         $onshoreWind = $onshoreWindCalculator->calculate(
             $windSpeed?->value !== null ? (float) $windSpeed->value : null,
             $windDirection?->value !== null ? (float) $windDirection->value : null,
+            $this->device->coastline_bearing !== null
+                ? (float) $this->device->coastline_bearing
+                : null,
         );
 
         $result = $fuzzyEngine->evaluate(new FuzzyInput(

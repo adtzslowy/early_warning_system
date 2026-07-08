@@ -16,7 +16,8 @@
       "WebSearch",
       "Bash(test -f __TRACKED_VAR__/o-key.svg)",
       "Bash(/Users/adit/.luna/bin/php -l app/Http/Controllers/SettingsController.php)",
-      "Bash(~/.luna/bin/php /usr/local/bin/composer remove laravel/reverb --no-interaction)"
+      "Bash(~/.luna/bin/php /usr/local/bin/composer remove laravel/reverb --no-interaction)",
+      "Bash(~/.luna/bin/php artisan *)"
     ]
   }
 }

@@ -24,6 +24,7 @@ class Device extends Model
         "location",
         "latitude",
         "longitude",
+        "coastline_bearing",
         "api_url",
         "api_key",
         "api_enabled",
@@ -36,6 +37,7 @@ class Device extends Model
         return [
             "latitude" => "decimal:7",
             "longitude" => "decimal:7",
+            "coastline_bearing" => "decimal:2",
             "status" => DeviceStatus::class,
             "last_seen_at" => "datetime",
             "api_key" => "encrypted",

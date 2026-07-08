@@ -478,26 +478,19 @@
 
             // KPI atas kalau device ini yang sedang dipilih
             if (e.device_code === SELECTED) {
-                const timestamp = e.evaluated_at ? new Date(e.evaluated_at).getTime() : Date.now();
-                if (lastSnapshotAt !== null && timestamp <= lastSnapshotAt && fromPoll) return;
-                lastSnapshotAt = Math.max(lastSnapshotAt || 0, timestamp);
-
+                // ── Data sensor LIVE: selalu perbarui tiap poll, JANGAN di-gate
+                // ke timestamp evaluasi fuzzy. Ketinggian air, telemetri & status
+                // adalah pembacaan sensor langsung (sumber sama dgn baris tabel).
+                // Kalau diikat ke evaluasi, saat worker antrean telat KPI ini beku
+                // padahal tabel device tetap jalan — itulah bug "sering berubah di
+                // tabel tapi tidak di card atas".
                 setMetric('[data-rt-water-hero]', e.water_level, 1);
-                setMetric('[data-rt-rise]', e.rise_rate, 2);
-                setMetric('[data-rt-onshore]', e.onshore_wind, 2);
-                setMetric('[data-rt-score]', e.risk_score, 0);
 
                 setTelemetry('temperature', e.temperature);
                 setTelemetry('humidity', e.humidity);
                 setTelemetry('air_pressure', e.air_pressure);
                 setTelemetry('wind_speed', e.wind_speed);
                 setTelemetry('wind_direction', e.wind_direction);
-
-                pushTelemetryPoint('temperature', e.temperature, timestamp);
-                pushTelemetryPoint('humidity', e.humidity, timestamp);
-                pushTelemetryPoint('air_pressure', e.air_pressure, timestamp);
-                pushTelemetryPoint('wind_speed', e.wind_speed, timestamp);
-                pushTelemetryPoint('wind_direction', e.wind_direction, timestamp);
 
                 const bar = document.querySelector('[data-rt-waterbar]');
                 if (bar) {
@@ -506,12 +499,29 @@
                     bar.style.backgroundColor = (RISK[e.risk] || RISK.aman).c;
                 }
 
+                const heroStatus = document.querySelector('[data-rt-status-hero]');
+                if (heroStatus) heroStatus.innerHTML = statusHTML(online);
+
+                // ── Turunan evaluasi fuzzy: hanya berubah saat ADA evaluasi baru.
+                // Diikat ke evaluated_at agar tidak dobel-proses & titik grafik
+                // telemetri tidak menumpuk di timestamp yang sama.
+                const timestamp = e.evaluated_at ? new Date(e.evaluated_at).getTime() : Date.now();
+                if (lastSnapshotAt !== null && timestamp <= lastSnapshotAt && fromPoll) return;
+                lastSnapshotAt = Math.max(lastSnapshotAt || 0, timestamp);
+
+                setMetric('[data-rt-rise]', e.rise_rate, 2);
+                setMetric('[data-rt-onshore]', e.onshore_wind, 2);
+                setMetric('[data-rt-score]', e.risk_score, 0);
+
+                pushTelemetryPoint('temperature', e.temperature, timestamp);
+                pushTelemetryPoint('humidity', e.humidity, timestamp);
+                pushTelemetryPoint('air_pressure', e.air_pressure, timestamp);
+                pushTelemetryPoint('wind_speed', e.wind_speed, timestamp);
+                pushTelemetryPoint('wind_direction', e.wind_direction, timestamp);
+
                 document.querySelectorAll('[data-rt-risk-hero]').forEach(function (el) {
                     el.innerHTML = badgeHTML(e.risk, el.hasAttribute('data-sm'));
                 });
-
-                const heroStatus = document.querySelector('[data-rt-status-hero]');
-                if (heroStatus) heroStatus.innerHTML = statusHTML(online);
 
                 const ev = document.querySelector('[data-rt-evaluated]');
                 if (ev) ev.textContent = fromPoll ? 'sinkron otomatis' : 'dievaluasi baru saja';
