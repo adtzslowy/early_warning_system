@@ -143,12 +143,14 @@
         // diperbarui saat perlu (bukan tiap poll yang cuma menggeser jangkar).
         let lastForecastTs = PREDICTION_CURVE.length ? PREDICTION_CURVE[PREDICTION_CURVE.length - 1].at_ts : 0;
         let CURRENT_WATER = @json($selected['water_level'] ?? null);
+        // `span` = rentang minimal sumbu-Y (satuan metrik). Menjaga perubahan
+        // kecil tetap tampak landai, bukan curam. `fixed` = rentang tetap.
         const TELEMETRY_META = {
-            temperature:    { label: 'Suhu', unit: '°C', decimals: 1, color: '#ef4444' },
-            humidity:       { label: 'Kelembapan', unit: '%', decimals: 0, color: '#0ea5e9' },
-            air_pressure:   { label: 'Tekanan Udara', unit: 'hPa', decimals: 1, color: '#8b5cf6' },
-            wind_speed:     { label: 'Kecepatan Angin', unit: 'm/s', decimals: 1, color: '#22c55e' },
-            wind_direction: { label: 'Arah Angin', unit: '°', decimals: 0, color: '#f97316' },
+            temperature:    { label: 'Suhu', unit: '°C', decimals: 1, color: '#ef4444', span: 8 },
+            humidity:       { label: 'Kelembapan', unit: '%', decimals: 0, color: '#0ea5e9', span: 30 },
+            air_pressure:   { label: 'Tekanan Udara', unit: 'hPa', decimals: 1, color: '#8b5cf6', span: 12 },
+            wind_speed:     { label: 'Kecepatan Angin', unit: 'm/s', decimals: 1, color: '#22c55e', span: 12 },
+            wind_direction: { label: 'Arah Angin', unit: '°', decimals: 0, color: '#f97316', fixed: [0, 360] },
         };
         const RISK = {
             aman:    { label: 'Aman',    c: 'var(--color-aman)' },
@@ -200,6 +202,20 @@
 
         const fmt = (v, d) => (v === null || v === undefined) ? '—' : Number(v).toFixed(d);
 
+        // Batas sumbu-Y dengan rentang minimal (span) + headroom 15%, supaya
+        // perubahan kecil (mis. suhu 27.5→27.9) tampak landai, tidak curam/jomplang.
+        function paddedBounds(points, span, fixed) {
+            if (fixed) return { min: fixed[0], max: fixed[1] };
+            const vals = (points || [])
+                .map(function (p) { return p[1]; })
+                .filter(function (v) { return v !== null && v !== undefined && !isNaN(v); });
+            if (!vals.length) return {};
+            const lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+            const mid = (lo + hi) / 2;
+            const half = Math.max((hi - lo) / 2, (span || 1) / 2) * 1.15;
+            return { min: mid - half, max: mid + half };
+        }
+
         function setMetric(selector, value, decimals) {
             const el = document.querySelector(selector);
             if (!el) return;
@@ -237,6 +253,12 @@
             activeRangeMinutes = minutes;
 
             if (telemetryChart) {
+                const meta = TELEMETRY_META[activeTelemetry] || TELEMETRY_META.temperature;
+                const data = telemetrySeries(activeTelemetry)[0].data;
+                telemetryChart.updateOptions({ yaxis: Object.assign(
+                    paddedBounds(data, meta.span, meta.fixed),
+                    { labels: { formatter: function (v) { return fmt(v, meta.decimals); } } },
+                ) }, false, false);
                 telemetryChart.updateSeries(telemetrySeries(activeTelemetry), true);
             }
         }
@@ -264,13 +286,16 @@
                         colors: [meta.color],
                         strokeColors: 'var(--color-surface)',
                     },
-                    yaxis: {
-                        labels: {
-                            formatter: function (value) {
-                                return fmt(value, meta.decimals);
+                    yaxis: Object.assign(
+                        paddedBounds(telemetrySeries(key)[0].data, meta.span, meta.fixed),
+                        {
+                            labels: {
+                                formatter: function (value) {
+                                    return fmt(value, meta.decimals);
+                                },
                             },
                         },
-                    },
+                    ),
                     tooltip: {
                         y: {
                             formatter: function (value) {
@@ -298,13 +323,13 @@
                 },
                 series: telemetrySeries(activeTelemetry),
                 colors: [meta.color],
-                stroke: { width: 2.5, curve: 'smooth' },
+                stroke: { width: 2.5, curve: 'smooth', lineCap: 'round' },
                 markers: {
-                    size: 4,
+                    size: 0,
                     strokeWidth: 2,
                     colors: [meta.color],
                     strokeColors: 'var(--color-surface)',
-                    hover: { size: 7 },
+                    hover: { size: 5 },
                 },
                 fill: {
                     type: 'gradient',
@@ -326,14 +351,17 @@
                     axisBorder: { color: 'var(--color-border)' },
                     axisTicks: { color: 'var(--color-border)' },
                 },
-                yaxis: {
-                    labels: {
-                        style: { colors: 'var(--color-text-muted)' },
-                        formatter: function (value) {
-                            return fmt(value, meta.decimals);
+                yaxis: Object.assign(
+                    paddedBounds(telemetrySeries(activeTelemetry)[0].data, meta.span, meta.fixed),
+                    {
+                        labels: {
+                            style: { colors: 'var(--color-text-muted)' },
+                            formatter: function (value) {
+                                return fmt(value, meta.decimals);
+                            },
                         },
                     },
-                },
+                ),
                 tooltip: {
                     theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
                     x: { format: 'HH:mm' },
@@ -410,13 +438,13 @@
                 },
                 series: predictionSeries(),
                 colors: [accent],
-                stroke: { width: 2.5, curve: 'smooth', dashArray: 5 },
+                stroke: { width: 2.5, curve: 'smooth', lineCap: 'round', dashArray: 5 },
                 markers: {
-                    size: 4,
+                    size: 0,
                     strokeWidth: 2,
                     colors: [accent],
                     strokeColors: 'var(--color-surface)',
-                    hover: { size: 7 },
+                    hover: { size: 5 },
                 },
                 fill: {
                     type: 'gradient',
@@ -438,14 +466,17 @@
                     axisBorder: { color: 'var(--color-border)' },
                     axisTicks: { color: 'var(--color-border)' },
                 },
-                yaxis: {
-                    labels: {
-                        style: { colors: 'var(--color-text-muted)' },
-                        formatter: function (value) {
-                            return fmt(value, 1);
+                yaxis: Object.assign(
+                    paddedBounds(predictionSeries()[0].data, 15),
+                    {
+                        labels: {
+                            style: { colors: 'var(--color-text-muted)' },
+                            formatter: function (value) {
+                                return fmt(value, 1);
+                            },
                         },
                     },
-                },
+                ),
                 tooltip: {
                     theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
                     x: { format: 'HH:mm' },
@@ -533,6 +564,13 @@
                     lastForecastTs = forecastTs;
                 }
                 if (predictionChart) {
+                    if (forecastChanged) {
+                        // Run baru → segarkan batas sumbu-Y (jangkar-only tetap landai).
+                        predictionChart.updateOptions({ yaxis: Object.assign(
+                            paddedBounds(predictionSeries()[0].data, 15),
+                            { labels: { formatter: function (v) { return fmt(v, 1); } } },
+                        ) }, false, false);
+                    }
                     // animate hanya saat run baru; geser jangkar biasa tanpa animasi.
                     predictionChart.updateSeries(predictionSeries(), forecastChanged);
                 } else if (PREDICTION_CURVE.length) {
