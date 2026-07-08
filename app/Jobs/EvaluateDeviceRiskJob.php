@@ -25,6 +25,15 @@ final class EvaluateDeviceRiskJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
+    /**
+     * Jalankan SETELAH transaksi penyimpanan sensor ter-commit. Penting saat
+     * QUEUE_CONNECTION=sync: event pemicu dipanggil di dalam DB::transaction
+     * (RobSyncService/DeviceApiSyncService), jadi tanpa ini evaluasi yang gagal
+     * bisa ikut me-rollback data sensor. Dengan afterCommit, data sensor aman
+     * dulu, evaluasi baru jalan.
+     */
+    public bool $afterCommit = true;
+
     public function __construct(
         public readonly Device $device,
     ) {}
