@@ -25,18 +25,21 @@ final class EvaluateDeviceRiskJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    /**
-     * Jalankan SETELAH transaksi penyimpanan sensor ter-commit. Penting saat
-     * QUEUE_CONNECTION=sync: event pemicu dipanggil di dalam DB::transaction
-     * (RobSyncService/DeviceApiSyncService), jadi tanpa ini evaluasi yang gagal
-     * bisa ikut me-rollback data sensor. Dengan afterCommit, data sensor aman
-     * dulu, evaluasi baru jalan.
-     */
-    public bool $afterCommit = true;
-
     public function __construct(
         public readonly Device $device,
-    ) {}
+    ) {
+        // Jalankan SETELAH transaksi penyimpanan sensor ter-commit. Penting saat
+        // QUEUE_CONNECTION=sync: event pemicu dipanggil di dalam DB::transaction
+        // (RobSyncService/DeviceApiSyncService), jadi tanpa ini evaluasi yang gagal
+        // bisa ikut me-rollback data sensor. Dengan afterCommit, data sensor aman
+        // dulu, evaluasi baru jalan.
+        //
+        // Di-set di constructor (bukan sebagai deklarasi properti) karena trait
+        // Illuminate\Bus\Queueable sudah mendeklarasikan $afterCommit tanpa tipe;
+        // meng-override-nya dengan `public bool $afterCommit = true;` memicu
+        // Fatal error konflik komposisi trait di PHP 8.3+.
+        $this->afterCommit = true;
+    }
 
     public function handle(
         FuzzyMamdaniEngine $fuzzyEngine,
