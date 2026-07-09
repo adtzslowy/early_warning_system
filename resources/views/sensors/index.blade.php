@@ -77,7 +77,7 @@
                 </x-empty-state>
             @else
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="rtable w-full text-sm">
                         <thead
                             class="border-b border-[var(--color-border)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
                             <tr>
@@ -91,16 +91,16 @@
                         <tbody class="divide-y divide-[var(--color-border)]">
                             @foreach ($sensors as $sensor)
                                 <tr class="transition-colors hover:bg-[var(--color-surface-2)]">
-                                    <td class="px-4 py-3">
+                                    <td data-label="Device" class="px-4 py-3">
                                         <span class="font-mono text-xs">{{ $sensor->device->device_code }}</span>
                                         <span
                                             class="ml-1 text-[var(--color-text-muted)]">{{ $sensor->device->name }}</span>
                                     </td>
-                                    <td class="px-4 py-3 font-medium">{{ Str::headline($sensor->type) }}</td>
-                                    <td class="px-4 py-3 text-[var(--color-text-muted)]">
+                                    <td data-label="Tipe" class="px-4 py-3 font-medium">{{ Str::headline($sensor->type) }}</td>
+                                    <td data-label="Nilai" class="px-4 py-3 text-[var(--color-text-muted)]">
                                         {{ number_format($sensor->value, 2) }} {{ $sensor->unit }}
                                     </td>
-                                    <td class="px-4 py-3 text-[var(--color-text-muted)]">
+                                    <td data-label="Direkam pada" class="px-4 py-3 text-[var(--color-text-muted)]">
                                         {{ $sensor->recorded_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB
                                     </td>
                                     <td class="px-4 py-3">

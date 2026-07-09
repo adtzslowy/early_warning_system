@@ -84,7 +84,7 @@
             </x-empty-state>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="rtable w-full text-sm">
                     <thead class="border-b border-[var(--color-border)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
                         <tr>
                             <th class="px-4 py-3 font-medium">Kode</th>
@@ -99,18 +99,18 @@
                     <tbody class="divide-y divide-[var(--color-border)]">
                         @foreach ($devices as $device)
                             <tr class="transition-colors hover:bg-[var(--color-surface-2)]">
-                                <td class="px-4 py-3">
+                                <td data-label="Kode" class="px-4 py-3">
                                     <span class="font-mono text-xs">{{ $device->device_code }}</span>
                                 </td>
-                                <td class="px-4 py-3 font-medium">{{ $device->name }}</td>
-                                <td class="px-4 py-3 text-[var(--color-text-muted)]">{{ $device->location ?: '—' }}</td>
-                                <td class="px-4 py-3">
+                                <td data-label="Nama" class="px-4 py-3 font-medium">{{ $device->name }}</td>
+                                <td data-label="Lokasi" class="px-4 py-3 text-[var(--color-text-muted)]">{{ $device->location ?: '—' }}</td>
+                                <td data-label="Status" class="px-4 py-3">
                                     <x-status-dot :online="$device->status === \App\Enums\DeviceStatus::Online">
                                         {{ $device->status->label() }}
                                     </x-status-dot>
                                 </td>
-                                <td class="px-4 py-3 text-[var(--color-text-muted)]">{{ $device->sensors_count }}</td>
-                                <td class="px-4 py-3 text-[var(--color-text-muted)]">
+                                <td data-label="Sensor" class="px-4 py-3 text-[var(--color-text-muted)]">{{ $device->sensors_count }}</td>
+                                <td data-label="Terakhir terlihat" class="px-4 py-3 text-[var(--color-text-muted)]">
                                     @if ($device->last_seen_at)
                                         {{ $device->last_seen_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB
                                     @else

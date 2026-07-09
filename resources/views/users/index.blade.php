@@ -84,7 +84,7 @@
             </x-empty-state>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="rtable w-full text-sm">
                     <thead class="border-b border-[var(--color-border)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
                         <tr>
                             <th class="px-4 py-3 font-medium">Nama</th>
@@ -97,7 +97,7 @@
                     <tbody class="divide-y divide-[var(--color-border)]">
                         @foreach ($users as $u)
                             <tr class="transition-colors hover:bg-[var(--color-surface-2)]">
-                                <td class="px-4 py-3">
+                                <td data-label="Nama" class="px-4 py-3">
                                     <div class="flex items-center gap-3">
                                         @if ($u->fotoUrl())
                                             <img src="{{ $u->fotoUrl() }}" alt="Foto {{ $u->name }}"
@@ -108,15 +108,15 @@
                                         <span class="font-medium">{{ $u->name }}</span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-[var(--color-text-muted)]">{{ $u->email }}</td>
-                                <td class="px-4 py-3">
+                                <td data-label="Email" class="px-4 py-3 text-[var(--color-text-muted)]">{{ $u->email }}</td>
+                                <td data-label="Role" class="px-4 py-3">
                                     @forelse ($u->roles as $r)
                                         <span class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 py-0.5 text-xs font-medium">{{ ucfirst($r->name) }}</span>
                                     @empty
                                         <span class="text-[var(--color-text-muted)]">—</span>
                                     @endforelse
                                 </td>
-                                <td class="px-4 py-3 text-[var(--color-text-muted)]">
+                                <td data-label="Bergabung" class="px-4 py-3 text-[var(--color-text-muted)]">
                                     {{ $u->created_at?->timezone('Asia/Jakarta')->format('d M Y') ?? '—' }}
                                 </td>
                                 <td class="px-4 py-3">
