@@ -75,8 +75,8 @@ final class SyntheticRobDataGenerator
         [$temperature, $humidity, $pressure] = $this->diurnal($now, $device['device_code']);
 
         // Variasi kecil menit-ke-menit pada angin agar terlihat "hidup".
-        $windSpeed = $this->jitter($windSpeed, 0.4, $device['device_code'], 'ws');
-        $windFrom = fmod($windFrom + $this->jitter(0.0, 6.0, $device['device_code'], 'wd') + 360.0, 360.0);
+        $windSpeed = $this->jitter($now, $windSpeed, 0.4, $device['device_code'], 'ws');
+        $windFrom = fmod($windFrom + $this->jitter($now, 0.0, 6.0, $device['device_code'], 'wd') + 360.0, 360.0);
 
         return [
             'name' => $device['name'] ?? strtoupper((string) $device['device_code']),
@@ -138,8 +138,12 @@ final class SyntheticRobDataGenerator
         $tide = config('synthetic.tide');
 
         // Fase pasang-surut dari detik sejak epoch (kontinu antar-poll).
+        // fmod() dipakai (bukan `% (int) $periodSec`) karena period_hours=12.42
+        // tak presisi di float — cast ke int akan membulatkan periode sedetik
+        // lebih pendek/panjang dari pembagi float asli, menyebabkan glitch fase
+        // kecil tiap pergantian siklus.
         $periodSec = (float) $tide['period_hours'] * 3600.0;
-        $phase = ($now->getTimestamp() % (int) $periodSec) / $periodSec * 2 * M_PI;
+        $phase = fmod((float) $now->getTimestamp(), $periodSec) / $periodSec * 2 * M_PI;
         $tideRise = (float) $tide['amplitude_cm'] * sin($phase); // + saat pasang
 
         // Komponen angin onshore (270° = onshore). Hanya yang mendorong ke darat.
@@ -150,7 +154,7 @@ final class SyntheticRobDataGenerator
         $distance = (float) $tide['base_distance_cm']
             - $tideRise
             - $surge
-            + $this->jitter(0.0, 1.5, $seed, 'wl');
+            + $this->jitter($now, 0.0, 1.5, $seed, 'wl');
 
         return max(
             (float) $tide['min_distance_cm'],
@@ -169,16 +173,17 @@ final class SyntheticRobDataGenerator
         $hour = (float) $now->copy()->timezone($tz)->format('H')
             + (float) $now->copy()->timezone($tz)->format('i') / 60.0;
 
-        // Suhu puncak ~15:00, minimum ~05:00.
+        // Suhu puncak ~15:00, minimum ~03:00 (sinus tunggal wajib beda fase
+        // 12 jam persis antara puncak & minimum).
         $tempPhase = ($hour - 9.0) / 24.0 * 2 * M_PI;
-        $temperature = 27.0 + 4.0 * sin($tempPhase) + $this->jitter(0.0, 0.3, $seed, 't');
+        $temperature = 27.0 + 4.0 * sin($tempPhase) + $this->jitter($now, 0.0, 0.3, $seed, 't');
 
         // Kelembapan berlawanan fase suhu (~70–95%).
-        $humidity = 82.0 - 12.0 * sin($tempPhase) + $this->jitter(0.0, 1.5, $seed, 'h');
+        $humidity = 82.0 - 12.0 * sin($tempPhase) + $this->jitter($now, 0.0, 1.5, $seed, 'h');
         $humidity = max(50.0, min(100.0, $humidity));
 
         // Tekanan: dua puncak harian (pasang atmosfer) ~1010 hPa.
-        $pressure = 1010.0 + 1.5 * sin(($hour / 12.0) * 2 * M_PI) + $this->jitter(0.0, 0.4, $seed, 'p');
+        $pressure = 1010.0 + 1.5 * sin(($hour / 12.0) * 2 * M_PI) + $this->jitter($now, 0.0, 0.4, $seed, 'p');
 
         return [$temperature, $humidity, $pressure];
     }
@@ -186,10 +191,16 @@ final class SyntheticRobDataGenerator
     /**
      * Jitter deterministik per menit: sama dalam satu menit (stabil untuk banyak
      * poll), berubah tiap menit. Berbasis hash(seed+channel+menit) → [-range, +range].
+     *
+     * PENTING: menerima $now sebagai parameter (bukan panggil Carbon::now()
+     * sendiri) supaya semua fitur dalam satu generate() memakai referensi
+     * waktu yang SAMA PERSIS — konsisten dgn method lain (buildPayload,
+     * waterLevelDistanceCm, diurnal) dan deterministik saat waktu di-freeze
+     * lewat Carbon::setTestNow() di test.
      */
-    private function jitter(float $center, float $range, string $seed, string $channel): float
+    private function jitter(Carbon $now, float $center, float $range, string $seed, string $channel): float
     {
-        $minute = (int) floor(Carbon::now()->getTimestamp() / 60);
+        $minute = (int) floor($now->getTimestamp() / 60);
         $h = crc32("{$seed}|{$channel}|{$minute}");
         $unit = ($h % 1000) / 1000.0; // [0,1)
 

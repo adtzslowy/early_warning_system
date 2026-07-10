@@ -14,7 +14,7 @@ enum SensorType: string
     public function unit(): string
     {
         return match ($this) {
-            self::WaterLevel => 'm',
+            self::WaterLevel => 'cm',
             self::AirPressure => 'hPa',
             self::WindSpeed => 'm/s',
             self::WindDirection => '°',

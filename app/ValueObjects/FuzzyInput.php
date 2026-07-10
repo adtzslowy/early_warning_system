@@ -8,7 +8,7 @@ final readonly class FuzzyInput
 {
     public function __construct(
         public float $waterLevel,   // cm
-        public float $onshoreWind,  // hPa
+        public float $onshoreWind,  // m/s
         public float $riseRate,     // cm/jam
     ) {}
 }

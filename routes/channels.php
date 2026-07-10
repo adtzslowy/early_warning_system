@@ -1,7 +1,4 @@
 <?php
 
-use Illuminate\Support\Facades\Broadcast;
-
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+// Proyek ini tidak memakai broadcasting/Reverb (BROADCAST_CONNECTION=null).
+// File ini sengaja dikosongkan; dashboard memakai AJAX polling.

@@ -27,9 +27,17 @@ use RuntimeException;
  */
 class BacktestPrediction extends Command
 {
+    /**
+     * Asumsi interval sampling sensor (menit). rob:sync dijadwalkan
+     * everyMinute() di routes/console.php, jadi ~1 baris/menit per device.
+     * Dipakai untuk menghitung embargo DEFAULT yang berskala dengan horizon
+     * (lihat handle()) — bukan konstanta tetap untuk semua horizon.
+     */
+    private const SAMPLING_INTERVAL_MINUTES = 1;
+
     protected $signature = 'prediction:backtest
         {--train=0.7 : Proporsi data awal untuk melatih (sisanya untuk uji)}
-        {--embargo=0 : Jumlah sampel jeda antara train & test (kurangi kebocoran batas)}
+        {--embargo= : Jumlah sampel jeda antara train & test. Kosong = otomatis per horizon (horizon/interval-sampling), supaya buffer anti-kebocoran cukup besar utk horizon jauh}
         {--device= : Batasi ke satu device_code tertentu}';
 
     protected $description = 'Backtest akurasi prediksi (MAE/RMSE/R²/% dalam toleransi) per horizon';
@@ -37,7 +45,10 @@ class BacktestPrediction extends Command
     public function handle(PredictionFeatureBuilder $builder): int
     {
         $trainRatio = (float) $this->option('train');
-        $embargo = max(0, (int) $this->option('embargo'));
+        $embargoOption = $this->option('embargo');
+        // null = hitung otomatis per horizon di dalam loop (lihat bawah);
+        // diisi eksplisit = dipakai sama untuk semua horizon (override manual).
+        $embargoOverride = $embargoOption !== null ? max(0, (int) $embargoOption) : null;
         $tolerances = [5.0, 10.0];
 
         if ($trainRatio <= 0.0 || $trainRatio >= 1.0) {
@@ -60,7 +71,9 @@ class BacktestPrediction extends Command
             'Backtest %d device · latih %d%% awal, uji sisanya%s',
             $devices->count(),
             (int) round($trainRatio * 100),
-            $embargo > 0 ? " · embargo {$embargo} sampel" : '',
+            $embargoOverride !== null
+                ? " · embargo {$embargoOverride} sampel (manual)"
+                : ' · embargo otomatis per horizon',
         ));
 
         $rows = [];
@@ -70,6 +83,14 @@ class BacktestPrediction extends Command
         $grandNaiveAbs = 0.0;
 
         foreach (PredictionHorizons::MINUTES as $horizon) {
+            // Buffer anti-kebocoran harus berskala dgn horizon: target sampel
+            // training paling akhir "mengintip" horizon menit ke depan, jadi
+            // butuh jeda >= horizon (dalam satuan sampel) sebelum area test
+            // dimulai, supaya window target training & feature test benar2
+            // terpisah. Horizon 120 menit butuh embargo jauh lebih besar dari
+            // horizon 15 menit — konstanta tunggal tidak cukup untuk keduanya.
+            $embargo = $embargoOverride ?? (int) ceil($horizon / self::SAMPLING_INTERVAL_MINUTES);
+
             $abs = [];
             $sq = [];
             $actuals = [];

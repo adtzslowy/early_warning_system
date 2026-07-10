@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\SensorDataSaved;
 use App\Jobs\EvaluateDeviceRiskJob;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
 final class DispatchRiskEvaluation
 {

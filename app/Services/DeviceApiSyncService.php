@@ -106,15 +106,32 @@ final class DeviceApiSyncService
      *  1) datar          → { status, suhu, ketinggian_air, ... } (dipakai apa adanya)
      *  2) terbungkus     → { devices: { kode: { ... } } } (gaya /api/rob)
      *
-     * Untuk bentuk terbungkus, dicocokkan berdasarkan device_code; bila kode
-     * tak ada di payload, ambil entri pertama (dummy satu-device).
+     * Untuk bentuk terbungkus, dicocokkan berdasarkan device_code. Bila kode
+     * tak ada DAN payload hanya berisi satu entri, itu dianggap skenario
+     * "dummy satu-device" (API testing) — entri itu dipakai apa adanya. Bila
+     * payload berisi BANYAK entri dan device_code tak ketemu, JANGAN menebak
+     * device lain: log peringatan dan kembalikan array kosong, supaya data
+     * milik device lain tidak pernah tersimpan di bawah device yang salah.
      */
     private function extractDevicePayload(array $payload, Device $device): array
     {
         if (isset($payload['devices']) && is_array($payload['devices'])) {
             $devices = $payload['devices'];
 
-            return $devices[$device->device_code] ?? (reset($devices) ?: []);
+            if (isset($devices[$device->device_code])) {
+                return $devices[$device->device_code];
+            }
+
+            if (count($devices) === 1) {
+                return reset($devices) ?: [];
+            }
+
+            Log::warning('DeviceApiSyncService: device_code tidak ditemukan di payload terbungkus multi-device, dilewati', [
+                'device_code' => $device->device_code,
+                'available_codes' => array_keys($devices),
+            ]);
+
+            return [];
         }
 
         return $payload;

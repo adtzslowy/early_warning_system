@@ -8,6 +8,7 @@ use App\Enums\SensorType;
 use App\Models\Device;
 use App\Models\Sensor;
 use App\Services\LunarPhaseCalculator;
+use App\Services\RiseRateCalculator;
 
 /**
  * Membangun dataset training dari histori sensor: tiap pasangan
@@ -58,6 +59,12 @@ final class PredictionFeatureBuilder
         $features = [];
         $targets = [];
 
+        // Pointer geser untuk mencari bacaan >=60 menit sebelum sampel saat
+        // ini (definisi SAMA dengan RiseRateCalculator::DEFAULT_LOOKBACK_MINUTES),
+        // bukan delta ke baris sebelumnya (~1 menit, sangat noisy). Aman O(n)
+        // karena threshold bergerak monoton seiring $i naik (data terurut asc).
+        $lookbackPointer = 0;
+
         foreach ($waterLevels as $i => $current) {
             if ($current->value === null) {
                 continue;
@@ -74,16 +81,29 @@ final class PredictionFeatureBuilder
                 continue;
             }
 
-            $previous = $i > 0 ? $waterLevels->get($i - 1) : null;
+            $threshold = $current->recorded_at->copy()->subMinutes(RiseRateCalculator::DEFAULT_LOOKBACK_MINUTES);
+
+            while (
+                $lookbackPointer + 1 < $i
+                && $waterLevels->get($lookbackPointer + 1)->recorded_at->lessThanOrEqualTo($threshold)
+            ) {
+                $lookbackPointer++;
+            }
+
+            $previous = $lookbackPointer < $i ? $waterLevels->get($lookbackPointer) : null;
             $slope = 0.0;
 
-            if ($previous !== null && $previous->value !== null) {
-                $hours = $previous->recorded_at->diffInSeconds($current->recorded_at) / 3600;
-                if ($hours > 0) {
-                    // Konvensi sama dengan RiseRateCalculator: jarak
-                    // mengecil (previous > current) => air naik => positif.
-                    $slope = ((float) $previous->value - (float) $current->value) / $hours;
-                }
+            if (
+                $previous !== null
+                && $previous->value !== null
+                && $previous->recorded_at->lessThanOrEqualTo($threshold)
+            ) {
+                $slope = RiseRateCalculator::rate(
+                    (float) $previous->value,
+                    $previous->recorded_at,
+                    (float) $current->value,
+                    $current->recorded_at,
+                ) ?? 0.0;
             }
 
             [$windX, $windY] = $this->windComponents(

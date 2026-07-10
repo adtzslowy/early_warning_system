@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 /**
  * Event internal: menandai satu batch data sensor baru tersimpan.
  * Dipakai untuk memicu evaluasi risiko (lihat DispatchRiskEvaluation).
- * Bukan event broadcast — hasil evaluasi disiarkan lewat DeviceRiskUpdated.
+ * Bukan event broadcast — proyek ini tidak memakai broadcasting/Reverb.
  */
 class SensorDataSaved
 {

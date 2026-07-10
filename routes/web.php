@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\MockRobController;
 use App\Http\Controllers\Authentication\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\SensorController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -118,4 +119,12 @@ Route::prefix("users")
         Route::delete("/{user}", [UserController::class, "destroy"])
             ->middleware("permission:delete users")
             ->name("users.destroy");
+    });
+
+
+Route::prefix('sensor')
+    ->middleware(['auth', 'permission:view sensors'])
+    ->group(function () {
+        Route::get('/', [SensorController::class, 'index'])->name('sensors');
+        Route::get('/{sensor}', [SensorController::class, 'show'])->name('sensors.show');
     });

@@ -7,16 +7,22 @@ namespace App\Services;
 use App\Enums\SensorType;
 use App\Models\Device;
 use App\Models\Sensor;
+use Illuminate\Support\Carbon;
 
 /**
  * PENTING: sensor ultrasonik mengukur JARAK ke permukaan air (sensor
  * menggantung di atas), bukan tinggi air langsung. Jarak yang MENGECIL
  * berarti air MENDEKAT ke sensor -> air sebenarnya NAIK. Delta dihitung
  * terbalik: (nilai_lama - nilai_baru), bukan (nilai_baru - nilai_lama).
+ *
+ * Rumus inti (rate()) dipakai BERSAMA oleh jalur live (forDevice, query DB
+ * "sekarang") dan PredictionFeatureBuilder (dari koleksi histori yang sudah
+ * dimuat) — supaya definisi fitur "rise rate" identik saat training maupun
+ * saat inferensi (lookback 60 menit yang sama), bukan dua rumus berbeda.
  */
 final class RiseRateCalculator
 {
-    private const DEFAULT_LOOKBACK_MINUTES = 60;
+    public const DEFAULT_LOOKBACK_MINUTES = 60;
 
     /**
      * @return float|null cm/jam. Positif = air NAIK (bahaya), negatif = air TURUN (aman).
@@ -41,15 +47,34 @@ final class RiseRateCalculator
             return null;
         }
 
+        return self::rate(
+            (float) $previous->value,
+            $previous->recorded_at,
+            (float) $latest->value,
+            $latest->recorded_at,
+        );
+    }
+
+    /**
+     * Rumus murni laju kenaikan (cm/jam) dari dua bacaan jarak ultrasonik.
+     * Dipakai baik oleh forDevice() (live) maupun PredictionFeatureBuilder
+     * (histori) supaya keduanya menghasilkan definisi fitur yang sama persis.
+     */
+    public static function rate(
+        float $previousValue,
+        Carbon $previousAt,
+        float $latestValue,
+        Carbon $latestAt,
+    ): ?float {
         // Carbon 3 (Laravel 12): diffInSeconds bertanda — pakai absolut (arg true)
         // agar selalu positif, berapa pun urutan tanggalnya.
-        $hoursElapsed = $latest->recorded_at->diffInSeconds($previous->recorded_at, true) / 3600;
+        $hoursElapsed = $latestAt->diffInSeconds($previousAt, true) / 3600;
 
         if ($hoursElapsed <= 0.0) {
             return null;
         }
 
-        $rawDelta = (float) $previous->value - (float) $latest->value;
+        $rawDelta = $previousValue - $latestValue;
 
         return round($rawDelta / $hoursElapsed, 3);
     }

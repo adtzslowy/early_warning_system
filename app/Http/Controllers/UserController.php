@@ -1,6 +1,6 @@
 <?php
 
-declare(stric_types=1);
+declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
@@ -22,10 +22,10 @@ class UserController extends Controller
             ->with("roles")
             ->when($search !== "", function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where("name", "like", "%{$seach}%")->orWhere(
+                    $q->where("name", "like", "%{$search}%")->orWhere(
                         "email",
                         "like",
-                        "%{$seach}%",
+                        "%{$search}%",
                     );
                 });
             })

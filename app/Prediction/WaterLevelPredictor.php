@@ -46,23 +46,33 @@ final class WaterLevelPredictor
             return null;
         }
 
+        // PENTING: speed & direction dipasangkan dari timestamp yang SAMA
+        // PERSIS (bukan "latest" masing-masing secara independen), konsisten
+        // dengan PredictionFeatureBuilder::windComponents() yang hanya
+        // memasangkan keduanya bila recorded_at identik (fallback 0,0 kalau
+        // tidak). Kalau tak dipasangkan, fitur training vs inferensi bisa
+        // punya distribusi berbeda saat salah satu sensor absen di satu poll.
         $latestWindSpeed = Sensor::query()
             ->where('device_id', $device->id)
             ->where('type', SensorType::WindSpeed)
+            ->whereNotNull('value')
             ->latest('recorded_at')
             ->first();
 
-        $latestWindDirection = Sensor::query()
-            ->where('device_id', $device->id)
-            ->where('type', SensorType::WindDirection)
-            ->latest('recorded_at')
-            ->first();
+        $pairedWindDirection = $latestWindSpeed !== null
+            ? Sensor::query()
+                ->where('device_id', $device->id)
+                ->where('type', SensorType::WindDirection)
+                ->where('recorded_at', $latestWindSpeed->recorded_at)
+                ->whereNotNull('value')
+                ->first()
+            : null;
 
         $windX = 0.0;
         $windY = 0.0;
 
-        if ($latestWindSpeed?->value !== null && $latestWindDirection?->value !== null) {
-            $radians = deg2rad((float) $latestWindDirection->value);
+        if ($latestWindSpeed?->value !== null && $pairedWindDirection?->value !== null) {
+            $radians = deg2rad((float) $pairedWindDirection->value);
             $windX = (float) $latestWindSpeed->value * sin($radians);
             $windY = (float) $latestWindSpeed->value * cos($radians);
         }

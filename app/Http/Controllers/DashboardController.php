@@ -75,11 +75,11 @@ final class DashboardController extends Controller
 
     public function snapshot(Request $request, Device $device): JsonResponse
     {
-        $user = $request->user();
-
         abort_unless(
-            $user->hasRole("admin") ||
-                $user->devices()->whereKey($user->id)->exists(),
+            Device::query()
+                ->visibleTo($request->user())
+                ->whereKey($device->getKey())
+                ->exists(),
             403,
         );
 

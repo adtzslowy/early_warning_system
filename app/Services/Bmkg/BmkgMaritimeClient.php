@@ -151,7 +151,12 @@ final class BmkgMaritimeClient
     {
         $listUrl = Str::beforeLast($this->url, '/').'/perairan_list';
 
-        $files = Cache::remember('bmkg:perairan_list', $this->cacheTtl, function () use ($listUrl) {
+        // Cache key menyertakan hash pendek dari $this->url supaya tidak ada
+        // tabrakan cache lintas environment kalau BMKG_PERAIRAN_URL pernah
+        // beda tapi berbagi cache store yang sama (mis. Redis).
+        $cacheKey = 'bmkg:perairan_list:'.substr(md5($this->url), 0, 8);
+
+        $files = Cache::remember($cacheKey, $this->cacheTtl, function () use ($listUrl) {
             $res = Http::timeout(8)->retry(2, 500)->acceptJson()->get($listUrl);
 
             return $res->ok() ? ($res->json('files') ?? []) : [];
