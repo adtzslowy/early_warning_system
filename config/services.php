@@ -54,4 +54,10 @@ return [
         'area_code' => env('BMKG_DEFAULT_AREA_CODE', ''),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI')
+    ]
+
 ];

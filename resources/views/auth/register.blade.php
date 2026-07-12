@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Masuk' }} · EWS Banjir Rob</title>
+    <title>{{ $title ?? 'Daftar' }} · EWS Banjir Rob</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap" rel="stylesheet">
@@ -20,7 +20,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /* Gelombang beranimasi untuk panel hero (nuansa air / rob) */
         @keyframes waveMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .wave { animation: waveMove linear infinite; will-change: transform; }
         .wave-1 { animation-duration: 12s; opacity: .55; }
@@ -35,7 +34,6 @@
 
 <body class="min-h-screen font-dash text-[var(--color-text)] antialiased">
 
-    {{-- Toggle tema (pojok kanan atas, global) --}}
     <button
         type="button"
         x-data="{ dark: document.documentElement.classList.contains('dark') }"
@@ -53,13 +51,52 @@
         <aside class="relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between p-10 xl:p-14
                       bg-[color-mix(in_srgb,var(--color-accent)_92%,black)] text-[var(--color-accent-foreground)]">
 
-            {{-- Glow dekoratif --}}
             <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-0">
                 <div class="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-white/10 blur-3xl"></div>
                 <div class="absolute top-1/3 right-0 h-56 w-56 rounded-full bg-black/20 blur-3xl"></div>
             </div>
 
-            {{-- Gelombang animasi di dasar panel --}}
+            <div class="relative z-10 flex items-center gap-3">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
+                    <x-heroicon-o-signal class="h-6 w-6" />
+                </div>
+                <span class="font-display text-lg font-bold tracking-tight">EWS Banjir Rob</span>
+            </div>
+
+            <div class="relative z-10 max-w-sm">
+                <h2 class="font-display text-3xl font-bold leading-tight xl:text-4xl">
+                    Gabung &amp; pantau risiko banjir rob wilayahmu.
+                </h2>
+                <ul class="mt-8 space-y-4 text-sm text-white/90">
+                    <li class="flex items-center gap-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                            <x-heroicon-o-bolt class="h-4 w-4" />
+                        </span>
+                        Peringatan dini otomatis berbasis multi-faktor
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                            <x-heroicon-o-device-phone-mobile class="h-4 w-4" />
+                        </span>
+                        Akses dari mana saja lewat browser
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
+                            <x-heroicon-o-shield-check class="h-4 w-4" />
+                        </span>
+                        Verifikasi email untuk keamanan akun
+                    </li>
+                </ul>
+            </div>
+
+            <div class="relative z-10 flex items-center gap-2 text-xs text-white/80">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70"></span>
+                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
+                </span>
+                Memantau Perairan Ketapang — Selat Karimata
+            </div>
+
             <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 h-40 overflow-hidden">
                 <svg class="wave wave-1 absolute bottom-0 h-24 w-[200%]" viewBox="0 0 1440 120" preserveAspectRatio="none" fill="currentColor">
                     <path d="M0,64 C240,120 480,0 720,48 C960,96 1200,24 1440,64 L1440,120 L0,120 Z"/>
@@ -81,7 +118,6 @@
             </div>
 
             <div class="w-full max-w-md">
-                {{-- Brand (tampil di mobile saja, karena desktop sudah di panel kiri) --}}
                 <div class="mb-6 flex flex-col items-center text-center lg:hidden">
                     <div class="float-slow mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
                         <x-heroicon-o-signal class="h-6 w-6" />
@@ -90,25 +126,11 @@
                 </div>
 
                 <div class="mb-6 hidden lg:block">
-                    <h1 class="font-display text-2xl font-bold tracking-tight">Selamat datang kembali</h1>
-                    <p class="mt-1 text-sm text-[var(--color-text-muted)]">Masuk untuk mengakses dashboard monitoring.</p>
+                    <h1 class="font-display text-2xl font-bold tracking-tight">Buat akun baru</h1>
+                    <p class="mt-1 text-sm text-[var(--color-text-muted)]">Daftar untuk mulai memantau risiko banjir rob.</p>
                 </div>
 
                 <div class="card p-6 sm:p-8">
-                    {{-- Sukses (mis. setelah verifikasi / daftar) --}}
-                    @if (session('status'))
-                        <div class="mb-5 flex items-start gap-2.5 rounded-lg border border-[color-mix(in_srgb,var(--color-aman)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-aman)_10%,transparent)] px-3.5 py-2.5 text-sm text-[var(--color-aman)]">
-                            <x-heroicon-o-check-circle class="mt-0.5 h-4 w-4 shrink-0" />
-                            <span>{{ session('status') }}</span>
-                        </div>
-                    @endif
-
-                    @if ($errors->has('email'))
-                        <div class="mb-5 flex items-start gap-2.5 rounded-lg border border-[color-mix(in_srgb,var(--color-bahaya)_45%,transparent)] bg-[color-mix(in_srgb,var(--color-bahaya)_10%,transparent)] px-3.5 py-2.5 text-sm text-[var(--color-bahaya)]">
-                            <x-heroicon-o-exclamation-circle class="mt-0.5 h-4 w-4 shrink-0" />
-                            <span>{{ $errors->first('email') }}</span>
-                        </div>
-                    @endif
 
                     {{-- Tombol Google --}}
                     <a href="{{ route('google.redirect') }}"
@@ -119,46 +141,56 @@
                             <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z"/>
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38z"/>
                         </svg>
-                        Masuk dengan Google
+                        Daftar dengan Google
                     </a>
 
-                    {{-- Pemisah --}}
                     <div class="my-5 flex items-center gap-3 text-xs text-[var(--color-text-muted)]">
                         <span class="h-px flex-1 bg-[var(--color-border)]"></span>
                         atau dengan email
                         <span class="h-px flex-1 bg-[var(--color-border)]"></span>
                     </div>
 
-                    <form method="POST" action="{{ route('proses') }}" class="space-y-4" x-data="{ show: false }">
+                    <form method="POST" action="{{ route('register.store') }}" class="space-y-4" x-data="{ show: false, show2: false }">
                         @csrf
 
+                        {{-- Nama --}}
+                        <div>
+                            <label for="name" class="mb-1.5 block text-sm font-medium">Nama Lengkap</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[var(--color-text-muted)]">
+                                    <x-heroicon-o-user class="h-4 w-4" />
+                                </span>
+                                <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus
+                                    autocomplete="name" placeholder="Nama Anda"
+                                    class="h-10 w-full rounded-lg border bg-[var(--color-surface)] pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] @error('name') border-[var(--color-bahaya)] @else border-[var(--color-border)] focus-visible:border-[var(--color-accent)] @enderror">
+                            </div>
+                            @error('name') <p class="mt-1 text-xs text-[var(--color-bahaya)]">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Email --}}
                         <div>
                             <label for="email" class="mb-1.5 block text-sm font-medium">Email</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[var(--color-text-muted)]">
                                     <x-heroicon-o-envelope class="h-4 w-4" />
                                 </span>
-                                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus
+                                <input id="email" type="email" name="email" value="{{ old('email') }}" required
                                     autocomplete="email" inputmode="email" placeholder="nama@email.com"
-                                    class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
+                                    class="h-10 w-full rounded-lg border bg-[var(--color-surface)] pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] @error('email') border-[var(--color-bahaya)] @else border-[var(--color-border)] focus-visible:border-[var(--color-accent)] @enderror">
                             </div>
+                            @error('email') <p class="mt-1 text-xs text-[var(--color-bahaya)]">{{ $message }}</p> @enderror
                         </div>
 
+                        {{-- Password --}}
                         <div>
-                            <div class="mb-1.5 flex items-center justify-between">
-                                <label for="password" class="block text-sm font-medium">Password</label>
-                                {{-- link lupa password (opsional, kalau route ada) --}}
-                                @if (Route::has('password.request'))
-                                    <a href="{{ route('password.request') }}" class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]">Lupa password?</a>
-                                @endif
-                            </div>
+                            <label for="password" class="mb-1.5 block text-sm font-medium">Password</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[var(--color-text-muted)]">
                                     <x-heroicon-o-lock-closed class="h-4 w-4" />
                                 </span>
                                 <input id="password" :type="show ? 'text' : 'password'" name="password" required
-                                    autocomplete="current-password" placeholder="••••••••"
-                                    class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-9 pr-10 text-sm outline-none transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
+                                    autocomplete="new-password" placeholder="Minimal 8 karakter"
+                                    class="h-10 w-full rounded-lg border bg-[var(--color-surface)] pl-9 pr-10 text-sm outline-none transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] @error('password') border-[var(--color-bahaya)] @else border-[var(--color-border)] focus-visible:border-[var(--color-accent)] @enderror">
                                 <button type="button" @click="show = !show" tabindex="-1"
                                     class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
                                     :aria-label="show ? 'Sembunyikan password' : 'Tampilkan password'">
@@ -166,31 +198,42 @@
                                     <span x-show="show" x-cloak><x-heroicon-o-eye-slash class="h-4 w-4" /></span>
                                 </button>
                             </div>
+                            @error('password') <p class="mt-1 text-xs text-[var(--color-bahaya)]">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="flex items-center">
-                            <label class="flex cursor-pointer items-center gap-2 text-sm text-[var(--color-text-muted)]">
-                                <input type="checkbox" name="remember" value="1" @checked(old('remember'))
-                                    class="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]">
-                                Ingat saya
-                            </label>
+                        {{-- Konfirmasi Password --}}
+                        <div>
+                            <label for="password_confirmation" class="mb-1.5 block text-sm font-medium">Konfirmasi Password</label>
+                            <div class="relative">
+                                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[var(--color-text-muted)]">
+                                    <x-heroicon-o-lock-closed class="h-4 w-4" />
+                                </span>
+                                <input id="password_confirmation" :type="show2 ? 'text' : 'password'" name="password_confirmation" required
+                                    autocomplete="new-password" placeholder="Ulangi password"
+                                    class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] pl-9 pr-10 text-sm outline-none transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
+                                <button type="button" @click="show2 = !show2" tabindex="-1"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+                                    :aria-label="show2 ? 'Sembunyikan password' : 'Tampilkan password'">
+                                    <span x-show="!show2"><x-heroicon-o-eye class="h-4 w-4" /></span>
+                                    <span x-show="show2" x-cloak><x-heroicon-o-eye-slash class="h-4 w-4" /></span>
+                                </button>
+                            </div>
                         </div>
 
                         <x-button type="submit" variant="primary" class="w-full">
-                            Masuk
-                            <x-heroicon-o-arrow-right-on-rectangle class="h-4 w-4" />
+                            Daftar
+                            <x-heroicon-o-arrow-right class="h-4 w-4" />
                         </x-button>
                     </form>
                 </div>
 
-                {{-- Link daftar --}}
                 <p class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
-                    Belum punya akun?
-                    <a href="{{ route('register') }}" class="font-medium text-[var(--color-accent)] hover:underline">Daftar sekarang</a>
+                    Sudah punya akun?
+                    <a href="{{ route('login') }}" class="font-medium text-[var(--color-accent)] hover:underline">Masuk di sini</a>
                 </p>
 
                 <p class="mt-2 text-center text-xs text-[var(--color-text-muted)]">
-                    &copy; {{ date('Y') }} OVERLORD
+                    &copy; {{ date('Y') }} EWS Banjir Rob Ketapang
                 </p>
             </div>
         </main>
