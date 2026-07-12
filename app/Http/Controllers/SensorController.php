@@ -34,22 +34,22 @@ class SensorController extends Controller
             })
             ->when($deviceId !== '', fn ($query) => $query->where('device_id', $deviceId))
             ->when($type !== '', fn ($query) => $query->where('type', $type))
-            ->latest('recorded_at')
-            ->simplePaginate(10)
+            ->orderByDesc('recorded_at')
+            ->orderByDesc('id')
+            ->cursorPaginate(10)
             ->withQueryString();
 
         $devices = Device::query()
             ->visibleTo($request->user())
             ->orderBy('device_code')
             ->get(['id', 'device_code', 'name']);
+
         $types = collect(SensorType::cases())->map(fn ($t) => $t->value);
 
         $view = view('sensors.index', compact(
             'sensors', 'search', 'deviceId', 'type', 'devices', 'types', 'total'
         ));
 
-        // Kalau request datang dari fetch() live-search, cukup kirim
-        // fragment tabelnya saja, tanpa header/breadcrumb/filter form.
         return $request->ajax() ? $view->fragment('results') : $view;
     }
 
