@@ -7,7 +7,6 @@ namespace App\Jobs;
 use App\Events\PredictionCompleted;
 use App\Models\Device;
 use App\Models\Prediction;
-use App\Prediction\PredictionHorizons;
 use App\Prediction\WaterLevelPredictor;
 use App\ValueObjects\PredictionResult;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -33,16 +32,9 @@ class RefreshPredictionJob implements ShouldQueue
      */
     public function handle(WaterLevelPredictor $predictor): void
     {
-        /** @var list<PredictionResult> $results */
-        $results = [];
-
-        foreach (PredictionHorizons::MINUTES as $horizonMinutes) {
-            $result = $predictor->predict($this->device, $horizonMinutes);
-
-            if ($result !== null) {
-                $results[] = $result;
-            }
-        }
+        // Semua horizon sekaligus: histori dimuat & fitur di-precompute SEKALI
+        // (bukan 8× seperti dulu), jadi jauh lebih cepat untuk histori besar.
+        $results = $predictor->predictAll($this->device);
 
         if ($results === []) {
             return; // histori belum cukup untuk horizon manapun

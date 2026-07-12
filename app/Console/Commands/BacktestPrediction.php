@@ -100,7 +100,10 @@ class BacktestPrediction extends Command
             $devicesUsed = 0;
 
             foreach ($devices as $device) {
-                $data = $builder->build($device, $horizon);
+                // windowDays: null → seluruh histori (backtest butuh sampel
+                // sebanyak mungkin untuk evaluasi, beda dari produksi yang
+                // dibatasi jendela demi kecepatan).
+                $data = $builder->build($device, $horizon, windowDays: null);
                 if ($data === null) {
                     continue;
                 }

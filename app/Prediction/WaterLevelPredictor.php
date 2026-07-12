@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace App\Prediction;
 
-use App\Enums\SensorType;
 use App\Models\Device;
-use App\Models\Sensor;
-use App\Services\LunarPhaseCalculator;
-use App\Services\RiseRateCalculator;
 use App\ValueObjects\PredictionResult;
 use RuntimeException;
 
@@ -16,16 +12,65 @@ final class WaterLevelPredictor
 {
     public function __construct(
         private readonly PredictionFeatureBuilder $featureBuilder = new PredictionFeatureBuilder(),
-        private readonly LunarPhaseCalculator $lunarPhaseCalculator = new LunarPhaseCalculator(),
-        private readonly RiseRateCalculator $riseRateCalculator = new RiseRateCalculator(),
     ) {}
 
+    /**
+     * Prediksi seluruh horizon SEKALIGUS. Histori dimuat & fitur di-precompute
+     * SEKALI (loadSeries), lalu tiap horizon hanya mencocokkan target + melatih
+     * regresi — jauh lebih ringan daripada memanggil predict() 8×.
+     *
+     * @return list<PredictionResult>
+     */
+    public function predictAll(Device $device): array
+    {
+        $samples = $this->featureBuilder->loadSeries($device);
+
+        if ($samples === null || $samples === []) {
+            return [];
+        }
+
+        // Fitur "saat ini" untuk inferensi = fitur sampel TERBARU. Karena
+        // di-precompute dengan cara yang sama seperti data training, tidak ada
+        // lagi train/serve skew, dan tanpa query tambahan.
+        $currentFeatures = end($samples)['features'];
+
+        $results = [];
+
+        foreach (PredictionHorizons::MINUTES as $horizonMinutes) {
+            $result = $this->fitAndPredict($samples, $currentFeatures, $horizonMinutes);
+
+            if ($result !== null) {
+                $results[] = $result;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Prediksi satu horizon (dipertahankan untuk pemakaian tunggal).
+     */
     public function predict(Device $device, int $horizonMinutes): ?PredictionResult
     {
-        $training = $this->featureBuilder->build($device, $horizonMinutes);
+        $samples = $this->featureBuilder->loadSeries($device);
+
+        if ($samples === null || $samples === []) {
+            return null;
+        }
+
+        return $this->fitAndPredict($samples, end($samples)['features'], $horizonMinutes);
+    }
+
+    /**
+     * @param  list<array{ts: int, value: float, features: float[]}>  $samples
+     * @param  float[]  $currentFeatures
+     */
+    private function fitAndPredict(array $samples, array $currentFeatures, int $horizonMinutes): ?PredictionResult
+    {
+        $training = $this->featureBuilder->buildForHorizon($samples, $horizonMinutes);
 
         if ($training === null) {
-            return null; // histori belum cukup
+            return null; // histori belum cukup untuk horizon ini
         }
 
         $model = new LinearRegression();
@@ -36,60 +81,9 @@ final class WaterLevelPredictor
             return null; // data training kurang bervariasi
         }
 
-        $latestWaterLevel = Sensor::query()
-            ->where('device_id', $device->id)
-            ->where('type', SensorType::WaterLevel)
-            ->latest('recorded_at')
-            ->first();
-
-        if ($latestWaterLevel === null || $latestWaterLevel->value === null) {
-            return null;
-        }
-
-        // PENTING: speed & direction dipasangkan dari timestamp yang SAMA
-        // PERSIS (bukan "latest" masing-masing secara independen), konsisten
-        // dengan PredictionFeatureBuilder::windComponents() yang hanya
-        // memasangkan keduanya bila recorded_at identik (fallback 0,0 kalau
-        // tidak). Kalau tak dipasangkan, fitur training vs inferensi bisa
-        // punya distribusi berbeda saat salah satu sensor absen di satu poll.
-        $latestWindSpeed = Sensor::query()
-            ->where('device_id', $device->id)
-            ->where('type', SensorType::WindSpeed)
-            ->whereNotNull('value')
-            ->latest('recorded_at')
-            ->first();
-
-        $pairedWindDirection = $latestWindSpeed !== null
-            ? Sensor::query()
-                ->where('device_id', $device->id)
-                ->where('type', SensorType::WindDirection)
-                ->where('recorded_at', $latestWindSpeed->recorded_at)
-                ->whereNotNull('value')
-                ->first()
-            : null;
-
-        $windX = 0.0;
-        $windY = 0.0;
-
-        if ($latestWindSpeed?->value !== null && $pairedWindDirection?->value !== null) {
-            $radians = deg2rad((float) $pairedWindDirection->value);
-            $windX = (float) $latestWindSpeed->value * sin($radians);
-            $windY = (float) $latestWindSpeed->value * cos($radians);
-        }
-
-        $currentFeatures = [
-            (float) $latestWaterLevel->value,
-            $this->riseRateCalculator->forDevice($device) ?? 0.0,
-            $windX,
-            $windY,
-            $this->lunarPhaseCalculator->springTideFactor(now()->toImmutable()),
-        ];
-
-        $predictedValue = $model->predict($currentFeatures);
-
         return new PredictionResult(
             horizonMinutes: $horizonMinutes,
-            predictedValue: round($predictedValue, 2),
+            predictedValue: round($model->predict($currentFeatures), 2),
             predictedAt: now()->addMinutes($horizonMinutes),
         );
     }
