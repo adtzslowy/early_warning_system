@@ -64,7 +64,9 @@ final class DeviceController extends Controller
             unset($data['api_key']);
         }
 
-        Device::create($data);
+        $device = Device::create($data);
+
+        $request->user()->devices()->attach($device->id);
 
         return redirect()
             ->route("devices")

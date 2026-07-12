@@ -82,19 +82,19 @@ Route::prefix('devices')
             ->middleware('permission:view devices')
             ->name('devices');
         Route::get('/create', [DeviceController::class, 'create'])
-            ->middleware('permission:create devices')
+            ->middleware('permission:view devices')
             ->name('devices.create');
         Route::post('/', [DeviceController::class, 'store'])
-            ->middleware('permission:create devices')
+            ->middleware('permission:view devices')
             ->name('devices.store');
         Route::get('/{device:device_code}/edit', [DeviceController::class, 'edit'])
-            ->middleware('permission:edit devices')
+            ->middleware('permission:view devices')
             ->name('devices.edit');
         Route::patch('/{device:device_code}', [DeviceController::class, 'update'])
-            ->middleware('permission:edit devices')
+            ->middleware('permission:view devices')
             ->name('devices.update');
         Route::delete('/{device:device_code}', [DeviceController::class, 'destroy'])
-            ->middleware('permission:delete devices')
+            ->middleware('permission:view devices')
             ->name('devices.destroy');
     });
 

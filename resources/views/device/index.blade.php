@@ -25,7 +25,7 @@
         title="Devices"
         description="Kelola alat pemantau tinggi muka air di jaringan pesisir."
     >
-        @can('create devices')
+        @can('view devices')
             <x-slot:actions>
                 <x-button href="{{ route('devices.create') }}" variant="primary">
                     <x-heroicon-o-plus class="h-4 w-4" />
