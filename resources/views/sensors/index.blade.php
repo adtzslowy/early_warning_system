@@ -12,11 +12,9 @@
         confirm: false,
         url: '',
         code: '',
-        ask(url, code) {
-            this.url = url;
+        ask(url, code) { this.url = url;
             this.code = code;
-            this.confirm = true;
-        },
+            this.confirm = true; },
 
         controller: null,
         async liveSearch() {
@@ -60,7 +58,8 @@
                         <x-heroicon-o-magnifying-glass
                             class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
                         <input type="search" name="q" value="{{ $search }}"
-                            placeholder="Cari kode atau nama device…" @input.debounce.400ms="liveSearch"
+                            placeholder="Cari kode atau nama device…"
+                            @input.debounce.400ms="liveSearch"
                             class="h-9 w-full rounded-lg border border-[var(--color-input)] bg-transparent pl-9 pr-3 text-sm shadow-sm transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
                     </div>
                     <select name="device_id" @change="liveSearch"
@@ -137,16 +136,14 @@
                             </table>
                         </div>
 
-                       <div class="flex flex-col items-center justify-between gap-4 border-t border-[var(--color-border)] p-4 sm:flex-row">
-                            <!-- Informasi total data menggunakan variabel $total aman dari Controller -->
-                            <div class="text-xs text-[var(--color-text-muted)]">
-                                Menampilkan halaman <span class="font-semibold">{{ $sensors->currentPage() }}</span> dari sekitar <span class="font-semibold">{{ number_format($total) }}</span> data total.
-                            </div>
-
-                            <!-- Tombol navigasi 'Sebelumnya' & 'Berikutnya' bawaan simplePaginate -->
-                            <div class="flex items-center gap-2">
-                                {{ $sensors->links() }}
-                            </div>
+                        <div
+                            class="flex flex-col items-center justify-between gap-3 border-t border-[var(--color-border)] p-4 sm:flex-row">
+                            <p class="text-xs text-[var(--color-text-muted)]">
+                                Menampilkan {{ $sensors->firstItem() }}–{{ $sensors->lastItem() }} dari
+                                {{ $sensors->total() }}
+                                data
+                            </p>
+                            <x-pagination :paginator="$sensors" />
                         </div>
                     @endif
                 @endfragment
