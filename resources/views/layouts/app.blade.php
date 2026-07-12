@@ -41,8 +41,10 @@
         <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 z-20 bg-black/60 lg:hidden">
         </div>
 
-        {{-- Main --}}
-        <div class="flex min-h-screen flex-1 flex-col">
+        {{-- Main. `min-w-0` WAJIB: tanpa ini flex item pakai min-width:auto sehingga
+             konten lebar (mis. tabel) memaksa kolom melar melebihi viewport → halaman
+             scroll horizontal & card kepotong di kanan pada layar HP. --}}
+        <div class="flex min-h-screen min-w-0 flex-1 flex-col">
             @include('partials.header')
 
             <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">

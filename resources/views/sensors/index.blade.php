@@ -15,6 +15,28 @@
         ask(url, code) { this.url = url;
             this.code = code;
             this.confirm = true; },
+
+        controller: null,
+        async liveSearch() {
+            if (this.controller) this.controller.abort();
+            this.controller = new AbortController();
+
+            const params = new URLSearchParams(new FormData(this.$refs.filterForm));
+
+            try {
+                const res = await fetch('{{ route('sensors') }}?' + params.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    signal: this.controller.signal,
+                });
+
+                if (!res.ok) throw new Error('Request failed: ' + res.status);
+
+                this.$refs.results.innerHTML = await res.text();
+                history.pushState({}, '', '?' + params.toString());
+            } catch (e) {
+                if (e.name !== 'AbortError') console.error(e);
+            }
+        },
     }" @keydown.escape.window="confirm = false">
 
         <x-page-header title="History Sensor" description="Riwayat data pembacaan sensor dari seluruh device pemantau.">
@@ -30,15 +52,17 @@
 
         <x-card padding="p-0">
             <div class="border-b border-[var(--color-border)] p-4">
-                <form method="GET" action="{{ route('sensors') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <form method="GET" action="{{ route('sensors') }}" x-ref="filterForm"
+                    class="flex flex-col gap-3 sm:flex-row sm:items-center" @submit.prevent="liveSearch">
                     <div class="relative flex-1">
                         <x-heroicon-o-magnifying-glass
                             class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
                         <input type="search" name="q" value="{{ $search }}"
                             placeholder="Cari kode atau nama device…"
+                            @input.debounce.400ms="liveSearch"
                             class="h-9 w-full rounded-lg border border-[var(--color-input)] bg-transparent pl-9 pr-3 text-sm shadow-sm transition-colors placeholder:text-[var(--color-text-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
                     </div>
-                    <select name="device_id"
+                    <select name="device_id" @change="liveSearch"
                         class="h-9 rounded-lg border border-[var(--color-input)] bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
                         <option value="">Semua device</option>
                         @foreach ($devices as $d)
@@ -46,7 +70,7 @@
                                 {{ $d->name }}</option>
                         @endforeach
                     </select>
-                    <select name="type"
+                    <select name="type" @change="liveSearch"
                         class="h-9 rounded-lg border border-[var(--color-input)] bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
                         <option value="">Semua tipe</option>
                         @foreach ($types as $t)
@@ -61,82 +85,69 @@
                 </form>
             </div>
 
-            @if ($sensors->isEmpty())
-                <x-empty-state icon="inbox" title="{{ $total === 0 ? 'Belum ada data sensor' : 'Tidak ada hasil' }}"
-                    message="{{ $total === 0 ? 'Data pembacaan sensor akan muncul di sini setelah sinkronisasi berjalan.' : 'Coba ubah kata kunci atau filter.' }}">
-                    @if ($total === 0)
-                        @can('create sensors')
-                            <x-slot:action>
-                                <x-button href="{{ route('sensors.create') }}" variant="primary">
-                                    <x-heroicon-o-plus class="h-4 w-4" />
-                                    Tambah Reading
-                                </x-button>
-                            </x-slot:action>
-                        @endcan
-                    @endif
-                </x-empty-state>
-            @else
-                <div class="overflow-x-auto">
-                    <table class="rtable w-full text-sm">
-                        <thead
-                            class="border-b border-[var(--color-border)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
-                            <tr>
-                                <th class="px-4 py-3 font-medium">Device</th>
-                                <th class="px-4 py-3 font-medium">Tipe</th>
-                                <th class="px-4 py-3 font-medium">Nilai</th>
-                                <th class="px-4 py-3 font-medium">Direkam pada</th>
-                                <th class="px-4 py-3 text-right font-medium">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[var(--color-border)]">
-                            @foreach ($sensors as $sensor)
-                                <tr class="transition-colors hover:bg-[var(--color-surface-2)]">
-                                    <td data-label="Device" class="px-4 py-3">
-                                        <span class="font-mono text-xs">{{ $sensor->device->device_code }}</span>
-                                        <span
-                                            class="ml-1 text-[var(--color-text-muted)]">{{ $sensor->device->name }}</span>
-                                    </td>
-                                    <td data-label="Tipe" class="px-4 py-3 font-medium">{{ Str::headline($sensor->type) }}</td>
-                                    <td data-label="Nilai" class="px-4 py-3 text-[var(--color-text-muted)]">
-                                        {{ number_format($sensor->value, 2) }} {{ $sensor->unit }}
-                                    </td>
-                                    <td data-label="Direkam pada" class="px-4 py-3 text-[var(--color-text-muted)]">
-                                        {{ $sensor->recorded_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }} WIB
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div class="flex items-center justify-end gap-1">
-                                            @can('edit sensors')
-                                                <a href="{{ route('sensors.edit', $sensor) }}"
-                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
-                                                    title="Edit">
-                                                    <x-heroicon-o-pencil-square class="h-4 w-4" />
-                                                </a>
-                                            @endcan
-                                            @can('delete sensors')
-                                                <button type="button"
-                                                    @click="ask('{{ route('sensors.destroy', $sensor) }}', '{{ $sensor->device->device_code }} — {{ Str::headline($sensor->type) }}')"
-                                                    class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-bahaya)_12%,transparent)] hover:text-[var(--color-bahaya)]"
-                                                    title="Hapus">
-                                                    <x-heroicon-o-trash class="h-4 w-4" />
-                                                </button>
-                                            @endcan
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+            <div x-ref="results">
+                @fragment('results')
+                    @if ($sensors->isEmpty())
+                        <x-empty-state icon="inbox" title="{{ $total === 0 ? 'Belum ada data sensor' : 'Tidak ada hasil' }}"
+                            message="{{ $total === 0 ? 'Data pembacaan sensor akan muncul di sini setelah sinkronisasi berjalan.' : 'Coba ubah kata kunci atau filter.' }}">
+                            @if ($total === 0)
+                                @can('create sensors')
+                                    <x-slot:action>
+                                        <x-button href="{{ route('sensors.create') }}" variant="primary">
+                                            <x-heroicon-o-plus class="h-4 w-4" />
+                                            Tambah Reading
+                                        </x-button>
+                                    </x-slot:action>
+                                @endcan
+                            @endif
+                        </x-empty-state>
+                    @else
+                        <div class="overflow-x-auto">
+                            <table class="rtable w-full text-sm">
+                                <thead
+                                    class="border-b border-[var(--color-border)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
+                                    <tr>
+                                        <th class="px-4 py-3 font-medium">Device</th>
+                                        <th class="px-4 py-3 font-medium">Tipe</th>
+                                        <th class="px-4 py-3 font-medium">Nilai</th>
+                                        <th class="px-4 py-3 font-medium">Direkam pada</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-[var(--color-border)]">
+                                    @foreach ($sensors as $sensor)
+                                        <tr class="transition-colors hover:bg-[var(--color-surface-2)]">
+                                            <td data-label="Device" class="px-4 py-3">
+                                                <span class="font-mono text-xs">{{ $sensor->device->device_code }}</span>
+                                                <span
+                                                    class="ml-1 text-[var(--color-text-muted)]">{{ $sensor->device->name }}</span>
+                                            </td>
+                                            <td data-label="Tipe" class="px-4 py-3 font-medium">
+                                                {{ Str::headline($sensor->type->value) }}</td>
+                                            <td data-label="Nilai" class="px-4 py-3 text-[var(--color-text-muted)]">
+                                                {{ number_format($sensor->value, 2) }} {{ $sensor->unit }}
+                                            </td>
+                                            <td data-label="Direkam pada" class="px-4 py-3 text-[var(--color-text-muted)]">
+                                                {{ $sensor->recorded_at->timezone('Asia/Jakarta')->format('d M Y, H:i') }}
+                                                WIB
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
 
-                <div
-                    class="flex flex-col items-center justify-between gap-3 border-t border-[var(--color-border)] p-4 sm:flex-row">
-                    <p class="text-xs text-[var(--color-text-muted)]">
-                        Menampilkan {{ $sensors->firstItem() }}–{{ $sensors->lastItem() }} dari {{ $sensors->total() }}
-                        data
-                    </p>
-                    <x-pagination :paginator="$sensors" />
-                </div>
-            @endif
+                        <div
+                            class="flex flex-col items-center justify-between gap-3 border-t border-[var(--color-border)] p-4 sm:flex-row">
+                            <p class="text-xs text-[var(--color-text-muted)]">
+                                Menampilkan {{ $sensors->firstItem() }}–{{ $sensors->lastItem() }} dari
+                                {{ $sensors->total() }}
+                                data
+                            </p>
+                            <x-pagination :paginator="$sensors" />
+                        </div>
+                    @endif
+                @endfragment
+            </div>
         </x-card>
 
         <template x-teleport="body">
