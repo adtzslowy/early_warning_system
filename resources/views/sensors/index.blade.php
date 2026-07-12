@@ -137,14 +137,16 @@
                             </table>
                         </div>
 
-                        <div
-                            class="flex flex-col items-center justify-between gap-3 border-t border-[var(--color-border)] p-4 sm:flex-row">
-                            <p class="text-xs text-[var(--color-text-muted)]">
-                                Menampilkan {{ $sensors->currentPage() }}–{{ number_format($total) }} dari
+                       <div class="flex flex-col items-center justify-between gap-4 border-t border-[var(--color-border)] p-4 sm:flex-row">
+                            <!-- Informasi total data menggunakan variabel $total aman dari Controller -->
+                            <div class="text-xs text-[var(--color-text-muted)]">
+                                Menampilkan halaman <span class="font-semibold">{{ $sensors->currentPage() }}</span> dari sekitar <span class="font-semibold">{{ number_format($total) }}</span> data total.
+                            </div>
+
+                            <!-- Tombol navigasi 'Sebelumnya' & 'Berikutnya' bawaan simplePaginate -->
+                            <div class="flex items-center gap-2">
                                 {{ $sensors->links() }}
-                                data
-                            </p>
-                            <x-pagination :paginator="$sensors" />
+                            </div>
                         </div>
                     @endif
                 @endfragment
