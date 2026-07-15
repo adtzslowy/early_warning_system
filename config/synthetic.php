@@ -25,10 +25,11 @@ return [
     // Zona waktu untuk model diurnal (suhu/kelembapan/tekanan).
     'timezone' => 'Asia/Jakarta',
 
-    // Amplitudo pasang-surut (cm) & periode dominan (jam, konstituen M2 ~12.42).
+    // Amplitudo pasang-surut (cm) & periode dominan (jam, konstituen M2 ~24.0).
     'tide' => [
         'amplitude_cm' => 35.0,
-        'period_hours' => 12.42,
+        // Diurnal method
+        'period_hours' => 24.0,
         // Jarak ultrasonik dasar saat air "netral" (cm). Kecil = air tinggi.
         'base_distance_cm' => 90.0,
         // Batas clamp jarak ultrasonik.
@@ -78,8 +79,7 @@ return [
             'location' => 'Kendawangan',
             'latitude' => -2.3300,
             'longitude' => 110.2100,
-            'area_code' => 'D.12', // Perairan Kendawangan (BMKG)
-            // Satu device sengaja offline untuk mendemokan jalur status realtime.
+            'area_code' => 'D.12',
             'offline' => true,
         ],
     ],
