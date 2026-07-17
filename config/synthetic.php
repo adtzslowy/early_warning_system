@@ -25,10 +25,11 @@ return [
     // Zona waktu untuk model diurnal (suhu/kelembapan/tekanan).
     'timezone' => 'Asia/Jakarta',
 
-    // Amplitudo pasang-surut (cm) & periode dominan (jam, konstituen M2 ~24.0).
+    // Amplitudo pasang-surut (cm) & periode dominan (jam). Perairan Ketapang
+    // bertipe diurnal/harian tunggal (Formzahl ~6,57 di Muara Sungai Pawan),
+    // jadi dipakai satu konstituen diurnal ~K1 (23,93 jam) dibulatkan 24 jam.
     'tide' => [
         'amplitude_cm' => 35.0,
-        // Diurnal method
         'period_hours' => 24.0,
         // Jarak ultrasonik dasar saat air "netral" (cm). Kecil = air tinggi.
         'base_distance_cm' => 90.0,

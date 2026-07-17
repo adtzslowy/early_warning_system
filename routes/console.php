@@ -32,3 +32,7 @@ Schedule::command(RefreshBmkgMaritime::class)
     ->hourly()
     ->withoutOverlapping();
 
+Schedule::command('alerts:check')
+    ->everyMinute()
+    ->withoutOverlapping();
+
