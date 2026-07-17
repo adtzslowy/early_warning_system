@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arsitektur Sistem: Early Warning System Banjir Rob</title>
+    <style>
+        :root {
+            --bg-primary: #fafaf9;
+            --bg-secondary: #f3f4f6;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5a6970;
+            --border: #e5e7eb;
+            --accent-main: #6366f1;
+            --accent-api: #10b981;
+            --accent-service: #f59e0b;
+            --accent-data: #8b5cf6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f0f0f;
+                --bg-secondary: #1a1a1a;
+                --text-primary: #f5f5f4;
+                --text-secondary: #a1a9b4;
+                --border: #3a3a3a;
+                --accent-main: #818cf8;
+                --accent-api: #10b981;
+                --accent-service: #f59e0b;
+                --accent-data: #a78bfa;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+        }
+
+        body {
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--accent-main);
+            padding-bottom: 0.75rem;
+            display: inline-block;
+        }
+
+        .diagram {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .box {
+            display: inline-block;
+            padding: 1rem;
+            border-radius: 6px;
+            border: 2px solid;
+            margin: 1rem;
+            min-width: 200px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .box-api {
+            border-color: var(--accent-api);
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .box-service {
+            border-color: var(--accent-service);
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .box-data {
+            border-color: var(--accent-data);
+            background-color: rgba(139, 92, 246, 0.1);
+        }
+
+        .box-logic {
+            border-color: var(--accent-main);
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .flow-title {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 2rem 0 1rem 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .flow-step {
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--accent-main);
+            padding: 1.25rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .flow-step strong {
+            color: var(--text-primary);
+        }
+
+        .flow-step .code {
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 0.85rem;
+            background-color: var(--bg-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .file-tree {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            font-family: "Monaco", monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .file-tree-item {
+            margin: 0.25rem 0;
+            line-height: 1.5;
+        }
+
+        .file-tree-item.folder {
+            font-weight: 600;
+            color: var(--accent-main);
+        }
+
+        .file-tree-item.file {
+            margin-left: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .component-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent-main);
+        }
+
+        .component-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .component-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .component-card .items {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .component-card .item {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+        }
+
+        .component-card .item::before {
+            content: "• ";
+            color: var(--accent-main);
+            font-weight: 600;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background-color: var(--bg-secondary);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .highlight {
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--accent-service);
+            padding: 1.25rem;
+            border-radius: 4px;
+            margin: 1.5rem 0;
+        }
+
+        .highlight strong {
+            color: var(--text-primary);
+        }
+
+        .label {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .label-api {
+            background-color: var(--accent-api);
+            color: white;
+        }
+
+        .label-service {
+            background-color: var(--accent-service);
+            color: white;
+        }
+
+        .label-data {
+            background-color: var(--accent-data);
+            color: white;
+        }
+
+        .label-logic {
+            background-color: var(--accent-main);
+            color: white;
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .diagram {
+                padding: 1rem;
+            }
+
+            .box {
+                min-width: 150px;
+                margin: 0.5rem;
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Arsitektur Sistem: Early Warning Banjir Rob</h1>
+            <p>Sistem terintegrasi untuk monitoring real-time dan prediksi ketinggian air menggunakan Logika Fuzzy Mamdani dan Regresi Linear</p>
+        </div>
+
+        <section>
+            <h2>🏗️ Visão Geral (High-Level Architecture)</h2>
+            <div class="diagram">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">DATA FLOW: IoT → Processing → Display</div>
+                    <div class="box box-api">IoT API<br>(Real/Mock)</div>
+                    <div style="display: inline-block; color: var(--accent-api); font-weight: 600; margin: 1rem;">↓</div>
+                    <div class="box box-service">RobSyncService</div>
+                    <div style="display: inline-block; color: var(--accent-service); font-weight: 600; margin: 1rem;">↓</div>
+                    <div class="box box-data">Database<br>(Devices, Sensors)</div>
+                    <div style="display: inline-block; color: var(--accent-data); font-weight: 600; margin: 1rem;">↓</div>
+                    <div class="box box-logic">Fuzzy Logic<br>+ Prediction</div>
+                    <div style="display: inline-block; color: var(--accent-logic); font-weight: 600; margin: 1rem;">↓</div>
+                    <div class="box box-logic">Dashboard<br>(Real-time)</div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>📦 Struktur Folder & Modules</h2>
+            <div class="file-tree">
+                <div class="file-tree-item folder">📁 app/</div>
+                <div class="file-tree-item file"><span class="label label-api">API</span> Http/Controllers/ — Handle HTTP requests</div>
+                <div class="file-tree-item file" style="margin-left: 3rem;">DashboardController, DeviceController, AlertController</div>
+                <div class="file-tree-item file"><span class="label label-data">DATA</span> Models/ — Eloquent models (Device, Sensor, Alert)</div>
+                <div class="file-tree-item file"><span class="label label-service">SERVICE</span> Services/ — Business logic & data processing</div>
+                <div class="file-tree-item file" style="margin-left: 3rem;">RobSyncService, SyntheticRobDataGenerator, OnshoreWindCalculator</div>
+                <div class="file-tree-item file"><span class="label label-logic">LOGIC</span> Fuzzy/ — Fuzzy Mamdani implementation</div>
+                <div class="file-tree-item file" style="margin-left: 3rem;">Engine/, Membership/, Rules/ — Fuzzification, inference, defuzzification</div>
+                <div class="file-tree-item file"><span class="label label-logic">LOGIC</span> Prediction/ — Linear regression untuk water level forecast</div>
+                <div class="file-tree-item file" style="margin-left: 3rem;">WaterLevelPredictor, LinearRegression, PredictionFeatureBuilder</div>
+                <div class="file-tree-item file"><span class="label label-service">SERVICE</span> Console/Commands/ — Background jobs & CLI tasks</div>
+                <div class="file-tree-item file" style="margin-left: 3rem;">RobData (sync), RefreshBmkgMaritime, BacktestPrediction</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>🔄 Data Flow: Real-time Monitoring</h2>
+
+            <div class="flow-title">1️⃣ Data Acquisition (Poll dari IoT API)</div>
+            <div class="flow-step">
+                <strong>Trigger:</strong> Artisan command `rob:sync` (polling berkala, default 5 menit)<br>
+                <strong>Flow:</strong>
+                <div class="code">RobSyncService::sync()</div>
+                → Fetch dari endpoint `$config['services.iot.base_url']`<br>
+                → Parse response JSON ke DTO (RobDevice)<br>
+                → Upsert Device record, store Sensor history<br>
+                <strong>Output:</strong> DB terisi device status + sensor readings (raw: jarak ultrasonik, suhu, kelembapan, dll)
+            </div>
+
+            <div class="flow-title">2️⃣ Data Transformation & Feature Engineering</div>
+            <div class="flow-step">
+                <strong>Service yang terlibat:</strong>
+                <div class="code">OnshoreWindCalculator, RiseRateCalculator, LunarPhaseCalculator</div>
+                <strong>Proses:</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Jarak ultrasonik → Tinggi muka air (invers)</li>
+                    <li>Arah + kecepatan angin → Komponen onshore (proyeksi kosinus)</li>
+                    <li>Pembacaan 2 jam lalu ↔ sekarang → Laju kenaikan air</li>
+                    <li>Tanggal/waktu → Fase bulan (untuk faktor spring tide)</li>
+                </ul>
+                <strong>Output:</strong> Feature set yang siap untuk Fuzzy + Prediction
+            </div>
+
+            <div class="flow-title">3️⃣ Risk Classification (Fuzzy Mamdani)</div>
+            <div class="flow-step">
+                <strong>Input:</strong> 3 variabel (ketinggian air, laju kenaikan, komponen angin onshore)<br>
+                <strong>Process:</strong>
+                <div class="code">FuzzyEngine → Fuzzification → Rule Inference → Defuzzification</div>
+                <strong>Output:</strong> Skor risiko 0-100 → kategori (Aman/Waspada/Siaga/Bahaya)<br>
+                <strong>Storage:</strong> RiskEvaluation record disimpan per device
+            </div>
+
+            <div class="flow-title">4️⃣ Water Level Prediction (Linear Regression)</div>
+            <div class="flow-step">
+                <strong>Input:</strong> Historical data (ketinggian air, angin, gelombang, fase bulan) dari 24 jam terakhir<br>
+                <strong>Process:</strong>
+                <div class="code">PredictionFeatureBuilder → LinearRegression::fit() → predict() untuk 8 horizons (15-120 min)</div>
+                <strong>Model retraining:</strong> Setiap 15 menit menggunakan OLS (Ordinary Least Squares)<br>
+                <strong>Output:</strong> Prediction record untuk setiap horizon waktu
+            </div>
+
+            <div class="flow-title">5️⃣ Display di Dashboard (Real-time via AJAX Polling)</div>
+            <div class="flow-step">
+                <strong>Endpoint:</strong>
+                <div class="code">GET /dashboard/devices/{device}/snapshot (JSON)</div>
+                <strong>Data yang dikembalikan:</strong> Status terkini (level, angin, suhu, risiko, prediksi)<br>
+                <strong>Update frequency:</strong> AJAX polling setiap 30-60 detik (configurable)
+            </div>
+        </section>
+
+        <section>
+            <h2>🧬 Core Components</h2>
+            <div class="component-grid">
+                <div class="component-card">
+                    <h3>📡 RobSyncService</h3>
+                    <p>Orchestrator utama: fetch data IoT, simpan ke DB, trigger events</p>
+                    <div class="items">
+                        <div class="item">HTTP GET ke IoT endpoint</div>
+                        <div class="item">DTO parsing (RobDevice)</div>
+                        <div class="item">DB transaction (atomicity)</div>
+                        <div class="item">Event dispatch (DeviceStatusChanged, SensorDataSaved)</div>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h3>🌊 SyntheticRobDataGenerator</h3>
+                    <p>Generate mock data untuk testing & demo (tanpa sensor fisik)</p>
+                    <div class="items">
+                        <div class="item">Pasang surut diurnal (sinus 24 jam)</div>
+                        <div class="item">Surge (gelombang + angin onshore)</div>
+                        <div class="item">Model diurnal (suhu, kelembapan, tekanan)</div>
+                        <div class="item">Jitter deterministik (reproducible noise)</div>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h3>💨 OnshoreWindCalculator</h3>
+                    <p>Ekstrak komponen angin yang relevan untuk wind setup</p>
+                    <div class="items">
+                        <div class="item">Input: kecepatan + arah angin</div>
+                        <div class="item">Output: komponen onshore (m/s)</div>
+                        <div class="item">Bearing pantai Ketapang: 270° (Barat)</div>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h3>📈 RiseRateCalculator</h3>
+                    <p>Hitung laju kenaikan muka air (early warning indicator)</p>
+                    <div class="items">
+                        <div class="item">Lookback: 60 menit</div>
+                        <div class="item">Formula: (d_lama - d_baru) / Δt</div>
+                        <div class="item">Output: cm/jam</div>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h3>🌙 LunarPhaseCalculator</h3>
+                    <p>Hitung fase bulan → faktor pasang purnama (spring tide risk)</p>
+                    <div class="items">
+                        <div class="item">Perioda: 29.53 hari sinodis</div>
+                        <div class="item">Normalisasi ke [0,1]</div>
+                        <div class="item">1.0 = spring tide (risiko max)</div>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h3>🧠 Fuzzy Mamdani Engine</h3>
+                    <p>Klasifikasi tingkat risiko multi-parameter</p>
+                    <div class="items">
+                        <div class="item">3 input: ketinggian, laju, angin</div>
+                        <div class="item">4 output: Aman, Waspada, Siaga, Bahaya</div>
+                        <div class="item">Method: Max-Min (Min implikasi, Max komposisi)</div>
+                        <div class="item">Defuzzifikasi: Centroid (CoG)</div>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h3>📊 WaterLevelPredictor</h3>
+                    <p>Prediksi ketinggian air multi-horizon (8 horizons: 15-120 min)</p>
+                    <div class="items">
+                        <div class="item">Algorithm: Multiple Linear Regression (MLR)</div>
+                        <div class="item">Features: 5 prediktor (level, laju, angin, fase bulan)</div>
+                        <div class="item">Retraining: Setiap 15 menit</div>
+                        <div class="item">Solver: OLS (Gauss-Jordan dengan partial pivoting)</div>
+                    </div>
+                </div>
+
+                <div class="component-card">
+                    <h3>🎨 DashboardController</h3>
+                    <p>Orchestrate data untuk real-time visualization</p>
+                    <div class="items">
+                        <div class="item">Snapshot endpoint: JSON response</div>
+                        <div class="item">Detail endpoint: historical data</div>
+                        <div class="item">Eager load relations (N+1 prevention)</div>
+                        <div class="item">Permission gating per device</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>🗄️ Database Schema (Key Models)</h2>
+            <table class="table">
+                <tr>
+                    <th>Model</th>
+                    <th>Key Fields</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><strong>Device</strong></td>
+                    <td>device_code, name, latitude, longitude, status, last_seen_at</td>
+                    <td>Master sensor (monitoring point)</td>
+                </tr>
+                <tr>
+                    <td><strong>Sensor</strong></td>
+                    <td>device_id, type, value, unit, recorded_at</td>
+                    <td>Raw readings history (time-series)</td>
+                </tr>
+                <tr>
+                    <td><strong>RiskEvaluation</strong></td>
+                    <td>device_id, risk_score, risk_level, evaluated_at</td>
+                    <td>Fuzzy output (risk classification)</td>
+                </tr>
+                <tr>
+                    <td><strong>Prediction</strong></td>
+                    <td>device_id, horizon_minutes, predicted_level, predicted_at</td>
+                    <td>Linear regression forecast (8 horizons)</td>
+                </tr>
+                <tr>
+                    <td><strong>Alert</strong></td>
+                    <td>device_id, risk_level, triggered_at, acknowledged_at</td>
+                    <td>Alert history (untuk notification system)</td>
+                </tr>
+                <tr>
+                    <td><strong>User, Role, Permission</strong></td>
+                    <td>Multi-level access control (RBAC)</td>
+                    <td>Authentication & authorization</td>
+                </tr>
+            </table>
+        </section>
+
+        <section>
+            <h2>⚡ Background Jobs & Scheduling</h2>
+            <div class="flow-step">
+                <strong>Command: `rob:sync`</strong> (Poll IoT API)<br>
+                Trigger: Setiap 5 menit via Laravel scheduler<br>
+                Action: RobSyncService::sync() → upsert devices, store sensors, dispatch events
+            </div>
+            <div class="flow-step">
+                <strong>Command: `RefreshBmkgMaritime`</strong> (Update weather forecast)<br>
+                Trigger: Setiap jam (0 * * * *)<br>
+                Action: Fetch prakiraan angin & gelombang dari BMKG API untuk kalibrasi model
+            </div>
+            <div class="flow-step">
+                <strong>Command: `DetectOfflineDevices`</strong> (Check device heartbeat)<br>
+                Trigger: Setiap 10 menit<br>
+                Action: Tandai device offline jika tidak ada pembacaan > 15 menit
+            </div>
+            <div class="flow-step">
+                <strong>Command: `BacktestPrediction`</strong> (Validation & accuracy check)<br>
+                Trigger: Manual (untuk testing & tuning)<br>
+                Action: Jalankan prediksi ulang terhadap historical data, bandingkan dengan aktual
+            </div>
+        </section>
+
+        <section>
+            <h2>🔐 Authentication & Authorization</h2>
+            <div class="highlight">
+                <strong>Auth Method:</strong> Laravel Fortify + Google OAuth<br>
+                <strong>RBAC:</strong> Spatie/Laravel-permission (Roles & Permissions per aksi)<br>
+                <strong>API Sync Endpoint:</strong> Public (no auth) — agar bisa di-poll seperti IoT asli<br>
+                <strong>Dashboard & Master Data:</strong> Protected (auth + verified email + permission checks)
+            </div>
+        </section>
+
+        <section>
+            <h2>🚀 Tech Stack</h2>
+            <table class="table">
+                <tr>
+                    <th>Layer</th>
+                    <th>Technology</th>
+                </tr>
+                <tr>
+                    <td><strong>Backend Framework</strong></td>
+                    <td>Laravel 11 (PHP 8.2+, MVC)</td>
+                </tr>
+                <tr>
+                    <td><strong>Database</strong></td>
+                    <td>MySQL 8.0 (Eloquent ORM)</td>
+                </tr>
+                <tr>
+                    <td><strong>Frontend</strong></td>
+                    <td>Blade templating, Tailwind CSS, Alpine.js, AJAX polling</td>
+                </tr>
+                <tr>
+                    <td><strong>Maps</strong></td>
+                    <td>Leaflet.js (interactive GIS)</td>
+                </tr>
+                <tr>
+                    <td><strong>External APIs</strong></td>
+                    <td>BMKG Maritime Forecast, Windy visualization</td>
+                </tr>
+                <tr>
+                    <td><strong>Async/Jobs</strong></td>
+                    <td>Laravel Scheduler + Queue (for heavy computation)</td>
+                </tr>
+                <tr>
+                    <td><strong>Testing</strong></td>
+                    <td>PHPUnit, Pest (synthetic data for reproducible tests)</td>
+                </tr>
+            </table>
+        </section>
+
+        <section>
+            <h2>🔄 Event-Driven Architecture</h2>
+            <div class="flow-step">
+                <strong>Event: DeviceStatusChanged</strong><br>
+                Listener: Log status change, trigger notification (jika offline)<br>
+                Fired by: RobSyncService saat status berubah online↔offline
+            </div>
+            <div class="flow-step">
+                <strong>Event: SensorDataSaved</strong><br>
+                Listener: Trigger risk evaluation (Fuzzy), prediction update (LinearRegression), check alerts<br>
+                Fired by: RobSyncService setiap kali sensor data disimpan
+            </div>
+        </section>
+
+        <section>
+            <h2>📐 Deployment & Configuration</h2>
+            <div class="highlight">
+                <strong>Environment Variables (.env):</strong><br>
+                - <code>APP_ENV</code>: production | local<br>
+                - <code>IOT_KETAPANG_URL</code>: IoT API endpoint (real atau mock)<br>
+                - <code>SYNTHETIC_ROB_ENABLED</code>: true untuk mock data (hanya non-prod)<br>
+                - <code>BMKG_API_KEY</code>: credential untuk BMKG Maritime Forecast<br>
+                - Database, Mail, Redis configs
+            </div>
+        </section>
+
+        <section>
+            <h2>👤 User Interactions & Workflows</h2>
+
+            <div class="flow-title">1️⃣ Authentication & Authorization</div>
+            <div class="flow-step">
+                <strong>Sign In:</strong> Email + Password OR Google OAuth<br>
+                <strong>Email Verification:</strong> Required (grace period: show dashboard sambil pending verification)<br>
+                <strong>RBAC:</strong> Roles (Admin, Operator, Viewer) + granular permissions per action<br>
+                <strong>Device Visibility:</strong> Users hanya bisa lihat devices sesuai permission mereka (visibleTo scope)
+            </div>
+
+            <div class="flow-title">2️⃣ Dashboard Monitoring (Main Interface)</div>
+            <div class="flow-step">
+                <strong>GET /dashboard</strong><br>
+                <strong>Display:</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Device list (table) dengan status terkini + worst-risk highlighting</li>
+                    <li>Device detail panel (dipilih user atau auto = highest risk device)</li>
+                    <li>Real-time metrics: ketinggian air, suhu, angin, risiko, prediksi</li>
+                    <li>Charts: historical telemetry (24h) + prediction curve (8h ke depan)</li>
+                    <li>Map: Leaflet.js dengan device markers (status visual)</li>
+                </ul>
+                <strong>Real-time updates:</strong> AJAX polling ke `/dashboard/devices/{device}/snapshot` setiap 30-60 detik
+            </div>
+
+            <div class="flow-title">3️⃣ Device Management (Master Data CRUD)</div>
+            <div class="flow-step">
+                <strong>GET /devices</strong> — List all devices (paginated)<br>
+                <strong>POST /devices</strong> — Create new device (name, latitude, longitude, area_code BMKG)<br>
+                <strong>PATCH /devices/{device}</strong> — Update device info<br>
+                <strong>DELETE /devices/{device}</strong> — Remove device<br>
+                <strong>Permission guard:</strong> Semua aksi memerlukan `permission:view devices`
+            </div>
+
+            <div class="flow-title">4️⃣ Sensor Data Browsing</div>
+            <div class="flow-step">
+                <strong>GET /sensor</strong> — List sensor readings (dengan filter device)<br>
+                <strong>GET /sensor/{sensor}</strong> — Show detail pembacaan + derived features (wind component, rise rate)<br>
+                <strong>Use case:</strong> Operator mau verify raw data, check kalibrasi sensor, investigate anomalies
+            </div>
+
+            <div class="flow-title">5️⃣ Alert Management</div>
+            <div class="flow-step">
+                <strong>GET /alert</strong> — View alert history (trigger time, risk level, device, acknowledged status)<br>
+                <strong>Data source:</strong> Alert model (diisi saat risk_level naik ke Siaga/Bahaya via event listener)<br>
+                <strong>Future enhancement:</strong> Real-time notification (email/SMS/push) saat alert triggered
+            </div>
+
+            <div class="flow-title">6️⃣ User & Role Management (Admin Only)</div>
+            <div class="flow-step">
+                <strong>GET /users</strong> — List users + roles<br>
+                <strong>POST /users</strong> — Create user (email, role, permissions)<br>
+                <strong>PATCH /users/{user}</strong> — Update user role/permissions<br>
+                <strong>DELETE /users/{user}</strong> — Deactivate user<br>
+                <strong>Permission guard:</strong> `permission:view users`, `permission:create users`, dll
+            </div>
+
+            <div class="flow-title">7️⃣ Settings & Preferences (Per User)</div>
+            <div class="flow-step">
+                <strong>GET /settings</strong> — View display preferences (theme, timezone, units)<br>
+                <strong>PUT /settings</strong> — Update preferences (stored in DisplayPreferences DTO)<br>
+                <strong>GET /settings/profile</strong> — View user profile (email, name)<br>
+                <strong>PATCH /settings/profile</strong> — Update profile info
+            </div>
+        </section>
+
+        <section>
+            <h2>🔗 User ↔ Device ↔ Data Relationships</h2>
+            <table class="table">
+                <tr>
+                    <th>Entity</th>
+                    <th>Relationship</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><strong>User</strong></td>
+                    <td>has many Roles → many Permissions</td>
+                    <td>Access control (RBAC)</td>
+                </tr>
+                <tr>
+                    <td><strong>Device</strong></td>
+                    <td>has many Sensors (time-series)</td>
+                    <td>Store raw readings</td>
+                </tr>
+                <tr>
+                    <td><strong>Device</strong></td>
+                    <td>has one latestRiskEvaluation</td>
+                    <td>Current risk status (Fuzzy output)</td>
+                </tr>
+                <tr>
+                    <td><strong>Device</strong></td>
+                    <td>has many Predictions (8 horizons)</td>
+                    <td>Forward-looking forecast (Linear Regression)</td>
+                </tr>
+                <tr>
+                    <td><strong>Device</strong></td>
+                    <td>has many Alerts (history)</td>
+                    <td>Audit trail (risk escalation events)</td>
+                </tr>
+                <tr>
+                    <td><strong>User</strong></td>
+                    <td>can view Devices via Permission</td>
+                    <td>Fine-grained access control per device</td>
+                </tr>
+            </table>
+        </section>
+
+        <section>
+            <h2>🎯 Event-Driven User Notifications (Future Enhancement)</h2>
+            <div class="flow-step">
+                <strong>Trigger:</strong> Risk level naik ke Waspada/Siaga/Bahaya (via Fuzzy engine)<br>
+                <strong>Flow:</strong>
+                <div class="code">Event SensorDataSaved → Listener RiskEvaluatedListener → Create Alert → Dispatch Notification</div>
+                <strong>Notification channels (to implement):</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Email alert (to subscribed users)</li>
+                    <li>SMS/WhatsApp (via gateway)</li>
+                    <li>Push notification (web/mobile app)</li>
+                    <li>In-app notification badge (dashboard)</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>💡 Key Design Decisions</h2>
+
+            <div class="flow-step">
+                <strong>Why Polling (not WebSocket)?</strong><br>
+                Simpler infrastructure, stateless server, no persistent connections. Polling interval (30-60s) adequate untuk early warning use case.
+            </div>
+
+            <div class="flow-step">
+                <strong>Why Synthetic Data?</strong><br>
+                Allows comprehensive testing tanpa sensor fisik. Model parameter diturunkan dari referensi lokal (Ketapang). Jitter deterministik memastikan reproducibility.
+            </div>
+
+            <div class="flow-step">
+                <strong>Why Fuzzy + Linear Regression (dual approach)?</strong><br>
+                Fuzzy: Real-time risk classification (multi-faktor, intuitive rules). Linear Regression: Forward-looking prediction (8 horizons) untuk early warning lead time.
+            </div>
+
+            <div class="flow-step">
+                <strong>Why Separate Services for Calculations?</strong><br>
+                Single Responsibility: OnshoreWindCalculator, RiseRateCalculator, LunarPhaseCalculator terpisah, testable, reusable.
+            </div>
+
+            <div class="flow-step">
+                <strong>Why AJAX Polling over WebSocket?</strong><br>
+                Dashboard tidak butuh real-time push (IoT data masuk setiap 5 min). Polling 30-60s cukup. Avoid complexity of WebSocket servers, connection management, fallback handling.
+            </div>
+
+            <div class="flow-step">
+                <strong>Why Display Preferences DTO?</strong><br>
+                Decouple user preferences dari database structure. Timezone-aware display, unit conversion (cm vs inch), theme preference — semua client-side rendered.
+            </div>
+        </section>
+
+        <div class="footer">
+            <p><strong>Arsitektur Sistem: Early Warning Banjir Rob</strong></p>
+            <p>Dihasilkan: 17 Juli 2026</p>
+            <p>Stack: Laravel 11 + Fuzzy Mamdani + Linear Regression + Real-time Dashboard</p>
+        </div>
+    </div>
+</body>
+</html>

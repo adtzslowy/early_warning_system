@@ -138,10 +138,10 @@ final class SyntheticRobDataGenerator
         $tide = config('synthetic.tide');
 
         // Fase pasang-surut dari detik sejak epoch (kontinu antar-poll).
-        // fmod() dipakai (bukan `% (int) $periodSec`) karena period_hours=12.42
-        // tak presisi di float — cast ke int akan membulatkan periode sedetik
-        // lebih pendek/panjang dari pembagi float asli, menyebabkan glitch fase
-        // kecil tiap pergantian siklus.
+        // fmod() dipakai (bukan `% (int) $periodSec`) supaya aman untuk
+        // period_hours pecahan (mis. K1 = 23,93) — cast ke int akan membulatkan
+        // periode sedetik lebih pendek/panjang dari pembagi float asli,
+        // menyebabkan glitch fase kecil tiap pergantian siklus.
         $periodSec = (float) $tide['period_hours'] * 3600.0;
         $phase = fmod((float) $now->getTimestamp(), $periodSec) / $periodSec * 2 * M_PI;
         $tideRise = (float) $tide['amplitude_cm'] * sin($phase); // + saat pasang

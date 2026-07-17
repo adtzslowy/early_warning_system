@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlertController;
 use App\Http\Controllers\Api\MockRobController;
 use App\Http\Controllers\Authentication\AuthController;
 use App\Http\Controllers\Authentication\RegisterController;
@@ -134,4 +135,9 @@ Route::prefix('sensor')
     ->group(function () {
         Route::get('/', [SensorController::class, 'index'])->name('sensors');
         Route::get('/{sensor}', [SensorController::class, 'show'])->name('sensors.show');
+    });
+
+Route::prefix('alert')->middleware(['auth', 'permission:view alert'])
+    ->group(function() {
+        Route::get('/', [AlertController::class, 'index'])->name('alerts');
     });
