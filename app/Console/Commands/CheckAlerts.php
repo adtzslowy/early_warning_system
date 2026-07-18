@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Enums\RiskLevel;
 use App\Models\Alert;
 use App\Models\RiskEvaluation;
+use App\Services\TelegramService;
 use Illuminate\Console\Command;
 
 class CheckAlerts extends Command
@@ -29,6 +30,8 @@ class CheckAlerts extends Command
 
     private function checkAndCreateAlerts(): void
     {
+        $telegramService = new TelegramService();
+
         // Ambil RiskEvaluation terbaru per device
         $latestEvaluations = RiskEvaluation::query()
             ->whereIn(
@@ -37,6 +40,7 @@ class CheckAlerts extends Command
                     ->selectRaw('MAX(id) as id')
                     ->groupBy('device_id'),
             )
+            ->with('device')
             ->get();
 
         foreach ($latestEvaluations as $evaluation) {
@@ -58,12 +62,19 @@ class CheckAlerts extends Command
             }
 
             // Create new alert
-            Alert::create([
+            $alert = Alert::create([
                 'device_id' => $evaluation->device_id,
                 'risk_level' => $evaluation->risk_level,
                 'message' => "Risk level naik ke {$evaluation->risk_level->label()} (score: {$evaluation->risk_score})",
                 'triggered_at' => now(),
             ]);
+
+            // Send Telegram notification
+            $telegramService->sendAlertNotification(
+                $evaluation->device,
+                $evaluation->risk_level->value,
+                $alert->message
+            );
         }
     }
 
