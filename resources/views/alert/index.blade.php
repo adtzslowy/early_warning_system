@@ -123,11 +123,13 @@
                 </table>
             </div>
         @endif
+        {{-- Info pagination & pagination controls --}}
+        <div class="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <p class="text-xs text-[var(--color-text-muted)]">
+                Menampilkan {{ $alerts->firstItem() ?? 0 }}–{{ $alerts->lastItem() ?? 0 }} dari {{ $alerts->total() }} alert
+            </p>
+            <x-pagination :paginator="$alerts" />
+        </div>
     </x-card>
-
-    {{-- Pagination --}}
-    <div class="flex justify-center">
-        {{ $alerts->links() }}
-    </div>
 </div>
 @endsection
