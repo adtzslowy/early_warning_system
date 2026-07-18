@@ -17,8 +17,8 @@
         description="Visualisasi realtime semua titik sensor di peta interaktif"
     />
 
-    <x-card padding="p-0">
-        <div id="map" class="h-[600px] w-full rounded-lg" style="height: 600px;"></div>
+    <x-card padding="p-0" class="overflow-hidden">
+        <div id="map" class="h-[600px] w-full rounded-lg" style="height: 600px; position: relative; z-index: 0;"></div>
     </x-card>
 
     {{-- Legend --}}
