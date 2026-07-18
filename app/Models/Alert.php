@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RiskLevel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,10 +19,14 @@ class Alert extends Model
         'acknowledged_at',
     ];
 
-    protected $casts = [
-        'triggered_at' => 'datetime',
-        'acknowledged_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'risk_level' => RiskLevel::class,
+            'triggered_at' => 'datetime',
+            'acknowledged_at' => 'datetime',
+        ];
+    }
 
     public function device(): BelongsTo
     {

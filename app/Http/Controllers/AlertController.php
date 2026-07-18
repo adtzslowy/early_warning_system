@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\RiskLevel;
 use App\Models\Alert;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,7 +24,9 @@ class AlertController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        $riskLevels = ['Waspada', 'Siaga', 'Bahaya'];
+        $riskLevels = array_filter(
+            [RiskLevel::Waspada->value, RiskLevel::Siaga->value, RiskLevel::Bahaya->value],
+        );
         $devices = \App\Models\Device::query()
             ->orderBy('device_code')
             ->get(['id', 'device_code', 'name']);
