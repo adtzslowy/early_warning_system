@@ -150,7 +150,7 @@
             humidity:       { label: 'Kelembapan', unit: '%', decimals: 0, color: '#0ea5e9', span: 30 },
             air_pressure:   { label: 'Tekanan Udara', unit: 'hPa', decimals: 1, color: '#8b5cf6', span: 12 },
             wind_speed:     { label: 'Kecepatan Angin', unit: 'm/s', decimals: 1, color: '#22c55e', span: 12 },
-            wind_direction: { label: 'Arah Angin', unit: '°', decimals: 0, color: '#f97316', fixed: [0, 360] },
+            water_level:    { label: 'Ketinggian Air', unit: 'cm', decimals: 1, color: '#06b6d4', span: 50 },
         };
         const RISK = {
             aman:    { label: 'Aman',    c: 'var(--color-aman)' },
@@ -551,7 +551,23 @@
                 setTelemetry('humidity', e.humidity);
                 setTelemetry('air_pressure', e.air_pressure);
                 setTelemetry('wind_speed', e.wind_speed);
+                setTelemetry('water_level', e.water_level);
                 setTelemetry('wind_direction', e.wind_direction);
+
+                // Update rotasi panah arah angin
+                const windArrow = document.querySelector('[data-wind-arrow]');
+                if (windArrow && e.wind_direction !== null && e.wind_direction !== undefined) {
+                    windArrow.setAttribute('transform', 'rotate(' + Number(e.wind_direction) + ' 50 50)');
+                }
+
+                // Update label arah angin
+                const windLabel = document.querySelector('[data-wind-label]');
+                if (windLabel && e.wind_direction !== null && e.wind_direction !== undefined) {
+                    const windDir = Number(e.wind_direction);
+                    const directions = ['U', 'TL', 'T', 'TG', 'G', 'BG', 'B', 'BD'];
+                    const idx = Math.round(((windDir % 360) + 22.5) / 45) % 8;
+                    windLabel.textContent = directions[idx];
+                }
 
                 const bar = document.querySelector('[data-rt-waterbar]');
                 if (bar) {
@@ -606,6 +622,7 @@
                 pushTelemetryPoint('humidity', e.humidity, timestamp);
                 pushTelemetryPoint('air_pressure', e.air_pressure, timestamp);
                 pushTelemetryPoint('wind_speed', e.wind_speed, timestamp);
+                pushTelemetryPoint('water_level', e.water_level, timestamp);
                 pushTelemetryPoint('wind_direction', e.wind_direction, timestamp);
 
                 document.querySelectorAll('[data-rt-risk-hero]').forEach(function (el) {
