@@ -36,7 +36,7 @@ class SensorController extends Controller
             ->when($type !== '', fn ($query) => $query->where('type', $type))
             ->orderByDesc('recorded_at')
             ->orderByDesc('id')
-            ->paginate(10)
+            ->paginate(25)
             ->withQueryString();
 
         $devices = Device::query()
