@@ -44,20 +44,7 @@ while true; do php artisan schedule:run; sleep 60; done
 
 ## 📅 Scheduled Commands
 
-### 1. **Rob Sync** `rob:sync`
-- **Interval:** Setiap 1 menit
-- **Purpose:** Fetch sensor data dari IoT API Ketapang
-- **Logs:** `storage/logs/scheduler.log`
-- **Status:** ✅ Active
-
-```bash
-# Manual run
-php artisan rob:sync
-```
-
----
-
-### 2. **Devices Poll** `devices:poll`
+### 1. **Devices Poll** `devices:poll`
 - **Interval:** Setiap 1 menit
 - **Purpose:** Poll & store sensor readings ke database
 - **Dependencies:** Device API endpoint

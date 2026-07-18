@@ -28,21 +28,6 @@ Artisan::command('inspire', function () {
 // ─────────────────────────────────────────────────────────────────────────
 
 /**
- * Sync sensor data dari IoT API Ketapang
- * Interval: Setiap 1 menit
- * Purpose: Ambil pembacaan sensor terbaru dari device
- */
-Schedule::command('rob:sync')
-    ->everyMinute()
-    ->withoutOverlapping()
-    ->onSuccess(function () {
-        \Illuminate\Support\Facades\Log::channel('scheduler')->info('✅ rob:sync completed');
-    })
-    ->onFailure(function () {
-        \Illuminate\Support\Facades\Log::channel('scheduler')->error('❌ rob:sync failed');
-    });
-
-/**
  * Poll data dari device endpoint
  * Interval: Setiap 1 menit
  * Purpose: Fetch & store data sensor ke database
