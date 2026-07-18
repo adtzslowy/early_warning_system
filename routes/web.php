@@ -7,6 +7,7 @@ use App\Http\Controllers\Authentication\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\MonitoringController;
 use App\Http\Controllers\SensorController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
@@ -74,6 +75,11 @@ Route::prefix('dashboard')
         Route::get('/devices/{device:device_code}/snapshot', [DashboardController::class, 'snapshot'])->name('dashboard.devices.snapshot');
         Route::get('/devices/{device:device_code}/detail', [DashboardController::class, 'detail'])->name('dashboard.devices.detail');
     });
+
+// Monitoring — Peta interaktif
+Route::get('/monitoring', [MonitoringController::class, 'index'])
+    ->middleware(['auth', 'verified.grace', 'permission:view monitoring'])
+    ->name('monitoring');
 
 // Master Data — Devices (CRUD, dilindungi permission per aksi).
 Route::prefix('devices')
