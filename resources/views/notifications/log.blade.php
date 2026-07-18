@@ -143,8 +143,7 @@
             </div>
         @endif
 
-        {{-- Pagination --}}
-        <div class="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
+        <div class="flex flex-col items-center justify-between gap-3 border-t border-[var(--color-border)] p-4 sm:flex-row">
             <p class="text-xs text-[var(--color-text-muted)]">
                 Menampilkan {{ $notifications->firstItem() ?? 0 }}–{{ $notifications->lastItem() ?? 0 }} dari {{ $notifications->total() }} notifikasi
             </p>

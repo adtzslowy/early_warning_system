@@ -123,8 +123,8 @@
                 </table>
             </div>
         @endif
-        {{-- Info pagination & pagination controls --}}
-        <div class="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
+
+        <div class="flex flex-col items-center justify-between gap-3 border-t border-[var(--color-border)] p-4 sm:flex-row">
             <p class="text-xs text-[var(--color-text-muted)]">
                 Menampilkan {{ $alerts->firstItem() ?? 0 }}–{{ $alerts->lastItem() ?? 0 }} dari {{ $alerts->total() }} alert
             </p>
