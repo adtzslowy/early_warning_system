@@ -106,7 +106,11 @@
             </div>
 
             <div class="min-h-[18rem]">
-                <div id="telemetryChart" class="h-72 w-full"></div>
+                <div id="telemetryChart" class="h-72 w-full">
+                    <div class="flex h-full items-center justify-center">
+                        <p class="text-sm text-[var(--color-text-muted)]">Loading chart...</p>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
@@ -127,7 +131,11 @@
             @if (empty($selected['prediction_curve']))
                 <x-empty-state icon="chart" title="Prediksi belum aktif" message="Menunggu histori data cukup untuk regresi." />
             @else
-                <div id="predictionChart" class="h-64 w-full"></div>
+                <div id="predictionChart" class="h-64 w-full">
+                    <div class="flex h-full items-center justify-center">
+                        <p class="text-sm text-[var(--color-text-muted)]">Loading chart...</p>
+                    </div>
+                </div>
 
                 {{-- Strip forecast tiles --}}
                 <div class="mt-6 space-y-3">

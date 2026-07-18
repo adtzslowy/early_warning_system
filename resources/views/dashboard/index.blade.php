@@ -311,6 +311,9 @@
             const target = document.querySelector('#telemetryChart');
             if (!target || !window.ApexCharts) return;
 
+            // Clear loading placeholder
+            target.innerHTML = '';
+
             const meta = TELEMETRY_META[activeTelemetry];
             telemetryChart = new window.ApexCharts(target, {
                 chart: {
@@ -432,6 +435,9 @@
         function initPredictionChart() {
             const target = document.querySelector('#predictionChart');
             if (!target || !window.ApexCharts || !PREDICTION_CURVE.length) return;
+
+            // Clear loading placeholder
+            target.innerHTML = '';
 
             const accent = '#6366f1';
             predictionChart = new window.ApexCharts(target, {
