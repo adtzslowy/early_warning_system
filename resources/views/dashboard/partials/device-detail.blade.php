@@ -127,10 +127,22 @@
         @endif
 
         @if ($prefs['cards']['prediction'])
-        <x-card title="Prediksi" subtitle="Proyeksi kenaikan/penurunan muka air laut">
+        <x-card title="Prediksi Ketinggian Air" subtitle="Proyeksi muka air laut 2 jam ke depan">
             @if (empty($selected['prediction_curve']))
-                <x-empty-state icon="chart" title="Prediksi belum aktif" message="Menunggu histori data cukup untuk regresi." />
+                <x-empty-state icon="chart" title="Prediksi belum aktif" message="Menunggu minimal 10 data sensor untuk membangun model prediksi." />
             @else
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-[var(--color-text-muted)]">Prediksi Menggunakan</p>
+                        <p class="text-sm text-[var(--color-text)]">Linear Regression · 8 titik proyeksi · 3 hari data terakhir</p>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-lg bg-[var(--color-surface-2)] px-3 py-2">
+                        <svg class="h-4 w-4 text-[var(--color-accent)]" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 3.062v6.418a3 3 0 01-.879 2.121l-6.798 6.799a1 1 0 01-1.414 0l-6.798-6.799A3 3 0 01.734 12.935V6.517a3.066 3.066 0 012.812-3.062zM9 12a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-xs font-medium">Terpercaya</span>
+                    </div>
+                </div>
                 <div id="predictionChart" class="h-64 w-full">
                     <div class="flex h-full items-center justify-center">
                         <p class="text-sm text-[var(--color-text-muted)]">Loading chart...</p>
@@ -139,18 +151,63 @@
 
                 {{-- Strip forecast tiles --}}
                 <div class="mt-6 space-y-3">
-                    <p class="text-xs font-medium text-[var(--color-text-muted)]">Proyeksi per horizon</p>
-                    <div data-rt-forecast class="flex gap-2 overflow-x-auto pb-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-[var(--color-text)]">Proyeksi Kenaikan Air</p>
+                            <p class="text-xs text-[var(--color-text-muted)]">Prediksi per horizon waktu</p>
+                        </div>
+                    </div>
+                    <div data-rt-forecast class="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
                         @foreach ($selected['prediction_curve'] as $point)
-                            <div class="flex min-w-[5rem] shrink-0 flex-col items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2.5 text-center transition-all hover:bg-[var(--color-surface)]">
-                                <span class="text-xs font-semibold text-[var(--color-text)]">+{{ $point['horizon'] }}m</span>
-                                <span class="mt-1.5 font-mono text-base font-bold">{{ number_format($point['value'], 1) }}<span class="text-xs text-[var(--color-text-muted)]">cm</span></span>
-                                <span class="mt-1 text-[10px] text-[var(--color-text-muted)]">{{ $point['at'] }}</span>
+                            @php
+                                $value = (float) $point['value'];
+                                $currentWater = $selected['water_level'] ?? 0;
+                                $trend = $value > $currentWater ? 'up' : ($value < $currentWater ? 'down' : 'stable');
+                                $riskColor = match(true) {
+                                    $value < 100 => 'var(--color-aman)',
+                                    $value < 150 => 'var(--color-waspada)',
+                                    $value < 200 => 'var(--color-siaga)',
+                                    default => 'var(--color-bahaya)',
+                                };
+                                $bgColor = match(true) {
+                                    $value < 100 => 'color-mix(in srgb, var(--color-aman) 12%, transparent)',
+                                    $value < 150 => 'color-mix(in srgb, var(--color-waspada) 12%, transparent)',
+                                    $value < 200 => 'color-mix(in srgb, var(--color-siaga) 12%, transparent)',
+                                    default => 'color-mix(in srgb, var(--color-bahaya) 12%, transparent)',
+                                };
+                            @endphp
+                            <div class="flex flex-col items-center rounded-lg border-2 p-3 text-center transition-all hover:shadow-md"
+                                style="border-color: {{ $riskColor }}; background-color: {{ $bgColor }};">
+                                <span class="text-[10px] font-semibold text-[var(--color-text-muted)] uppercase">+{{ $point['horizon'] }}m</span>
+                                <span class="mt-2 font-mono text-sm font-bold" style="color: {{ $riskColor }};">
+                                    {{ number_format($point['value'], 1) }}<span class="text-[10px] font-normal text-[var(--color-text-muted)]">cm</span>
+                                </span>
+                                <div class="mt-2 flex items-center gap-1">
+                                    @if ($trend === 'up')
+                                        <svg class="h-3.5 w-3.5" style="color: var(--color-bahaya);" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M3.293 5.293a1 1 0 011.414 0L10 10.586l5.293-5.293a1 1 0 111.414 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414z" transform="rotate(180 10 10)" />
+                                        </svg>
+                                    @elseif ($trend === 'down')
+                                        <svg class="h-3.5 w-3.5" style="color: var(--color-aman);" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M3.293 5.293a1 1 0 011.414 0L10 10.586l5.293-5.293a1 1 0 111.414 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414z" />
+                                        </svg>
+                                    @else
+                                        <svg class="h-3.5 w-3.5" style="color: var(--color-waspada);" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 3a1 1 0 011 1v8a1 1 0 11-2 0V4a1 1 0 011-1z" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <span class="mt-2 text-[9px] text-[var(--color-text-muted)]">{{ $point['at'] }}</span>
                             </div>
                         @endforeach
                     </div>
                 </div>
-                <p class="mt-4 text-[11px] text-[var(--color-text-muted)]">Prediksi diperbarui otomatis saat ada data sensor baru · Waktu dalam WIB</p>
+                <div class="mt-4 flex items-center gap-2 rounded-lg bg-[var(--color-surface-2)] p-3">
+                    <svg class="h-4 w-4 text-[var(--color-text-muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-[11px] text-[var(--color-text-muted)]">Prediksi otomatis diperbarui saat ada data sensor baru · Waktu dalam WIB</p>
+                </div>
             @endif
         </x-card>
         @endif
