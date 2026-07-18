@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Enums\RiskLevel;
 use App\Models\Alert;
 use App\Models\RiskEvaluation;
 use Illuminate\Console\Command;
@@ -30,9 +31,12 @@ class CheckAlerts extends Command
     {
         // Ambil RiskEvaluation terbaru per device
         $latestEvaluations = RiskEvaluation::query()
-            ->selectRaw('DISTINCT ON (device_id) device_id, risk_level, risk_score, evaluated_at')
-            ->orderByDesc('device_id')
-            ->orderByDesc('evaluated_at')
+            ->whereIn(
+                'id',
+                RiskEvaluation::query()
+                    ->selectRaw('MAX(id) as id')
+                    ->groupBy('device_id'),
+            )
             ->get();
 
         foreach ($latestEvaluations as $evaluation) {
@@ -57,14 +61,14 @@ class CheckAlerts extends Command
             Alert::create([
                 'device_id' => $evaluation->device_id,
                 'risk_level' => $evaluation->risk_level,
-                'message' => "Risk level naik ke {$evaluation->risk_level} (score: {$evaluation->risk_score})",
+                'message' => "Risk level naik ke {$evaluation->risk_level->label()} (score: {$evaluation->risk_score})",
                 'triggered_at' => now(),
             ]);
         }
     }
 
-    private function isAlertLevel(string $riskLevel): bool
+    private function isAlertLevel(RiskLevel $riskLevel): bool
     {
-        return in_array($riskLevel, ['Waspada', 'Siaga', 'Bahaya'], true);
+        return in_array($riskLevel, [RiskLevel::Waspada, RiskLevel::Siaga, RiskLevel::Bahaya], true);
     }
 }
