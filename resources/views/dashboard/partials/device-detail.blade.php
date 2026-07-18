@@ -122,42 +122,37 @@
 
             {{-- Widget Kecepatan & Arah Angin --}}
             <div class="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4">
-                <p class="text-xs font-medium text-[var(--color-text-muted)]">Kecepatan & Arah Angin</p>
-                <div class="mt-3 flex items-center justify-between gap-6">
+                <p class="mb-3 text-xs font-medium text-[var(--color-text-muted)]">Kecepatan & Arah Angin</p>
+                <div class="flex items-center justify-between gap-4">
+                    {{-- Kecepatan --}}
                     <div class="flex flex-col">
-                        <p class="text-sm text-[var(--color-text-muted)]">Kecepatan</p>
-                        <p class="mt-1 font-mono text-2xl font-semibold" data-rt-telemetry="wind_speed" data-decimals="1">
-                            {{ $selected['wind_speed'] !== null ? number_format($selected['wind_speed'], 1) : '—' }}<span class="text-sm text-[var(--color-text-muted)]"> m/s</span>
+                        <p class="text-xs text-[var(--color-text-muted)]">Kecepatan</p>
+                        <p class="mt-1 font-mono text-xl font-bold" data-rt-telemetry="wind_speed" data-decimals="1">
+                            {{ $selected['wind_speed'] !== null ? number_format($selected['wind_speed'], 1) : '—' }}<span class="text-xs text-[var(--color-text-muted)]"> m/s</span>
                         </p>
                     </div>
 
+                    {{-- Panah Kompas --}}
                     <div class="flex flex-col items-center">
-                        <p class="text-sm text-[var(--color-text-muted)]">Arah</p>
-                        <div class="relative mt-2 h-20 w-20">
+                        <div class="relative h-16 w-16">
                             <svg viewBox="0 0 100 100" class="h-full w-full" style="filter: drop-shadow(0 0 1px var(--color-text-muted));">
-                                {{-- Lingkaran kompas --}}
-                                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-
-                                {{-- Panah arah angin --}}
+                                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1" opacity="0.2"/>
                                 <g data-wind-arrow transform="rotate({{ $selected['wind_direction'] ?? 0 }} 50 50)">
-                                    {{-- Batang panah --}}
-                                    <line x1="50" y1="15" x2="50" y2="45" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    {{-- Kepala panah --}}
+                                    <line x1="50" y1="15" x2="50" y2="45" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
                                     <polygon points="50,10 45,20 55,20" fill="currentColor"/>
                                 </g>
-
-                                {{-- Titik pusat --}}
-                                <circle cx="50" cy="50" r="3" fill="currentColor"/>
+                                <circle cx="50" cy="50" r="2.5" fill="currentColor"/>
                             </svg>
                         </div>
-                        <p class="mt-2 text-xs font-mono text-[var(--color-text-muted)]">
+                        <p class="mt-1 text-[10px] font-mono text-[var(--color-text-muted)]">
                             <span data-rt-telemetry="wind_direction" data-decimals="0">{{ $selected['wind_direction'] !== null ? number_format($selected['wind_direction'], 0) : '—' }}</span>°
                         </p>
                     </div>
 
+                    {{-- Arah Kardinał --}}
                     <div class="flex flex-col text-right">
-                        <p class="text-sm text-[var(--color-text-muted)]">Arah</p>
-                        <p class="mt-1 text-lg font-semibold" data-wind-label>
+                        <p class="text-xs text-[var(--color-text-muted)]">Arah</p>
+                        <p class="mt-1 text-lg font-bold" data-wind-label>
                             @php
                                 $windDir = $selected['wind_direction'];
                                 $directions = ['U', 'TL', 'T', 'TG', 'G', 'BG', 'B', 'BD'];
@@ -169,7 +164,7 @@
                                 echo $dirLabel;
                             @endphp
                         </p>
-                        <p class="text-xs text-[var(--color-text-muted)]">Utara, Timur, dll</p>
+                        <p class="text-[10px] text-[var(--color-text-muted)]">kardinal</p>
                     </div>
                 </div>
             </div>
