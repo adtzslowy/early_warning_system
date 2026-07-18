@@ -48,9 +48,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
-{{-- Windy Embed API --}}
-<script src="https://embed.windy.com/assets/libBoot.js"></script>
-
 <script>
     const devices = @json($devices);
 
@@ -75,14 +72,13 @@
     // Set default layer
     osmLayer.addTo(map);
 
-    // Windy layer (using tile server)
-    const windyLayer = L.tileLayer(
-        'https://tiles.windy.com/tiles/wind_new/{z}/{x}/{y}.png',
+    // Topographic layer
+    const topoLayer = L.tileLayer(
+        'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
         {
-            attribution: '© Windy',
-            maxZoom: 19,
-            name: 'Windy (Angin)',
-            opacity: 0.7,
+            attribution: '© OpenTopoMap',
+            maxZoom: 17,
+            name: 'Topografi',
         }
     );
 
@@ -90,7 +86,7 @@
     const baseLayers = {
         'OpenStreetMap': osmLayer,
         'Satelit': satelliteLayer,
-        'Windy (Angin)': windyLayer,
+        'Topografi': topoLayer,
     };
 
     L.control.layers(baseLayers, null, {
