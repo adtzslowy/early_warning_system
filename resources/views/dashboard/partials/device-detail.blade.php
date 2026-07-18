@@ -64,9 +64,9 @@
 
     {{-- Telemetri + Prediksi --}}
     @if ($prefs['cards']['telemetry'] || $prefs['cards']['prediction'])
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         @if ($prefs['cards']['telemetry'])
-        <x-card title="Telemetri" subtitle="pembacaan sensor terbaru" :class="$prefs['cards']['prediction'] ? 'lg:col-span-2' : 'lg:col-span-3'">
+        <x-card title="Telemetri" subtitle="pembacaan sensor terbaru">
             @php
                 $telemetry = [
                     ['temperature', 'Suhu', $selected['temperature'], '°C', 1],
@@ -177,23 +177,26 @@
         @endif
 
         @if ($prefs['cards']['prediction'])
-        <x-card title="Prediksi" subtitle="Prediksi kenaikan/penurunan muka air laut" :class="$prefs['cards']['telemetry'] ? '' : 'lg:col-span-3'">
+        <x-card title="Prediksi" subtitle="Proyeksi kenaikan/penurunan muka air laut">
             @if (empty($selected['prediction_curve']))
                 <x-empty-state icon="chart" title="Prediksi belum aktif" message="Menunggu histori data cukup untuk regresi." />
             @else
-                <div id="predictionChart" class="h-56 w-full"></div>
+                <div id="predictionChart" class="h-64 w-full"></div>
 
-                {{-- Strip forecast: tiap titik horizon, mirip prakiraan cuaca per jam --}}
-                <div data-rt-forecast class="-mx-2 mt-3 flex gap-2 overflow-x-auto overflow-y-hidden px-2 pb-1">
-                    @foreach ($selected['prediction_curve'] as $point)
-                        <div class="flex min-w-[4.25rem] shrink-0 flex-col items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-2 py-2 text-center">
-                            <span class="text-[10px] font-medium text-[var(--color-text-muted)]">+{{ $point['horizon'] }}m</span>
-                            <span class="mt-1 font-mono text-sm font-semibold">{{ number_format($point['value'], 1) }}</span>
-                            <span class="text-[10px] text-[var(--color-text-muted)]">{{ $point['at'] }}</span>
-                        </div>
-                    @endforeach
+                {{-- Strip forecast tiles --}}
+                <div class="mt-6 space-y-3">
+                    <p class="text-xs font-medium text-[var(--color-text-muted)]">Proyeksi per horizon</p>
+                    <div data-rt-forecast class="flex gap-2 overflow-x-auto pb-2">
+                        @foreach ($selected['prediction_curve'] as $point)
+                            <div class="flex min-w-[5rem] shrink-0 flex-col items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] px-3 py-2.5 text-center transition-all hover:bg-[var(--color-surface)]">
+                                <span class="text-xs font-semibold text-[var(--color-text)]">+{{ $point['horizon'] }}m</span>
+                                <span class="mt-1.5 font-mono text-base font-bold">{{ number_format($point['value'], 1) }}<span class="text-xs text-[var(--color-text-muted)]">cm</span></span>
+                                <span class="mt-1 text-[10px] text-[var(--color-text-muted)]">{{ $point['at'] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-                <p class="mt-2 text-[10px] text-[var(--color-text-muted)]">Nilai dalam cm · waktu WIB · diperbarui saat data sensor baru masuk</p>
+                <p class="mt-4 text-[11px] text-[var(--color-text-muted)]">Prediksi diperbarui otomatis saat ada data sensor baru · Waktu dalam WIB</p>
             @endif
         </x-card>
         @endif
