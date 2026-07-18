@@ -18,14 +18,16 @@ class PredictionController extends Controller
             ->get(['id', 'device_code', 'name', 'location', 'status']);
 
         $predictor = new WaterLevelPredictor();
-        
+
         $predictions = $devices->map(function (Device $device) use ($predictor) {
             $curve = $predictor->predictAll($device);
-            
+            $riskLevel = $device->latestRiskEvaluation?->risk_level;
+
             return [
                 'device' => $device,
                 'curve' => $curve,
                 'has_prediction' => !empty($curve),
+                'risk_level' => $riskLevel?->value ?? 'aman',
             ];
         });
 
