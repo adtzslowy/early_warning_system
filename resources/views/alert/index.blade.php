@@ -102,7 +102,7 @@
                                     {{ $alert->message }}
                                 </td>
                                 <td class="px-4 py-3 text-[var(--color-text-muted)]">
-                                    {{ $alert->triggered_at->format('d M Y H:i') }}
+                                    {{ $alert->triggered_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}
                                 </td>
                                 <td class="px-4 py-3">
                                     @if ($alert->isAcknowledged())
