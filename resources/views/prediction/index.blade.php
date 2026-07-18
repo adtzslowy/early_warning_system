@@ -22,7 +22,7 @@
             @php
                 $device = $item['device'];
                 $curve = $item['curve'];
-                $riskLevel = $device->latestRiskEvaluation?->risk_level ?? 'aman';
+                $riskLevel = $item['risk_level'];
             @endphp
             <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden hover:border-[var(--color-accent)]/30 transition-colors">
                 {{-- Header --}}
