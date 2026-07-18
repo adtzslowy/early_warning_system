@@ -19,6 +19,7 @@ class MonitoringController extends Controller
             ->get()
             ->map(function ($device) {
                 $latestRisk = $device->riskEvaluations->first();
+                $waterLevel = $device->sensors()->latest('recorded_at')->value('value');
                 return [
                     'id' => $device->id,
                     'code' => $device->device_code,
@@ -26,10 +27,10 @@ class MonitoringController extends Controller
                     'location' => $device->location,
                     'latitude' => (float) $device->latitude,
                     'longitude' => (float) $device->longitude,
-                    'water_level' => $device->sensors()->latest('recorded_at')->value('value'),
+                    'water_level' => $waterLevel ? (float) $waterLevel : null,
                     'status' => $device->last_seen_at?->diffInMinutes(now()) < 15 ? 'online' : 'offline',
                     'risk' => $latestRisk?->risk_level?->value ?? 'aman',
-                    'risk_score' => $latestRisk?->risk_score ?? 0,
+                    'risk_score' => (float) ($latestRisk?->risk_score ?? 0),
                     'evaluated_at' => $latestRisk?->evaluated_at?->format('H:i'),
                 ];
             });
