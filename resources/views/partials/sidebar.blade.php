@@ -46,6 +46,12 @@
 
     <nav class="flex-1 space-y-6 overflow-y-auto px-3 py-4">
         @foreach ($menu as $section)
+            @php
+                $visibleItems = array_filter($section['items'], function ($item) {
+                    return empty($item['can']) || auth()->user()?->can($item['can']);
+                });
+            @endphp
+            @if (!empty($visibleItems))
             <div class="space-y-1">
                 @if (!empty($section['group']))
                     <p
@@ -72,6 +78,7 @@
                     </a>
                 @endforeach
             </div>
+            @endif
         @endforeach
     </nav>
 
