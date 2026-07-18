@@ -13,8 +13,9 @@ class PredictionController extends Controller
     public function index(): View
     {
         $devices = Device::query()
+            ->with(['latestWaterLevel', 'latestRiskEvaluation'])
             ->orderBy('device_code')
-            ->get(['id', 'device_code', 'name', 'location', 'status', 'water_level', 'risk']);
+            ->get(['id', 'device_code', 'name', 'location', 'status']);
 
         $predictor = new WaterLevelPredictor();
         

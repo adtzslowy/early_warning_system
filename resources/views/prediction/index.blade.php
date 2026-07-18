@@ -22,6 +22,7 @@
             @php
                 $device = $item['device'];
                 $curve = $item['curve'];
+                $riskLevel = $device->latestRiskEvaluation?->risk_level ?? 'aman';
             @endphp
             <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden hover:border-[var(--color-accent)]/30 transition-colors">
                 {{-- Header --}}
@@ -30,11 +31,11 @@
                         <div class="flex items-center gap-2">
                             <h3 class="text-lg font-semibold text-[var(--color-text)]">{{ $device->name }}</h3>
                             <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                style="border-color: color-mix(in srgb, var(--color-{{ $device->risk->value }}) 40%, transparent);
-                                        background-color: color-mix(in srgb, var(--color-{{ $device->risk->value }}) 12%, transparent);
-                                        color: var(--color-{{ $device->risk->value }});">
-                                <span class="h-1.5 w-1.5 rounded-full" style="background-color: var(--color-{{ $device->risk->value }});"></span>
-                                {{ ucfirst($device->risk->value) }}
+                                style="border-color: color-mix(in srgb, var(--color-{{ $riskLevel }}) 40%, transparent);
+                                        background-color: color-mix(in srgb, var(--color-{{ $riskLevel }}) 12%, transparent);
+                                        color: var(--color-{{ $riskLevel }});">
+                                <span class="h-1.5 w-1.5 rounded-full" style="background-color: var(--color-{{ $riskLevel }});"></span>
+                                {{ ucfirst($riskLevel) }}
                             </span>
                         </div>
                         <p class="text-sm text-[var(--color-text-muted)]">
@@ -63,7 +64,7 @@
                                 @foreach ($curve as $point)
                                     @php
                                         $value = (float) $point->predictedValue;
-                                        $currentWater = $device->water_level ?? 0;
+                                        $currentWater = $device->latestWaterLevel?->value ?? 0;
                                         $riskColor = match(true) {
                                             $value < 100 => 'var(--color-aman)',
                                             $value < 150 => 'var(--color-waspada)',
