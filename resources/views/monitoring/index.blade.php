@@ -18,7 +18,7 @@
     />
 
     <x-card padding="p-0">
-        <div id="map" class="h-[600px] w-full rounded-lg"></div>
+        <div id="map" class="h-[600px] w-full rounded-lg" style="height: 600px;"></div>
     </x-card>
 
     {{-- Legend --}}
@@ -105,11 +105,14 @@
         'bahaya': '#ef4444',
     };
 
+    const validDevices = [];
+
     devices.forEach(device => {
         if (!device.latitude || !device.longitude) return;
 
+        validDevices.push(device);
+
         const color = riskColors[device.risk] || '#666';
-        const statusClass = device.status === 'online' ? 'online' : 'offline';
 
         const marker = L.circleMarker([device.latitude, device.longitude], {
             radius: 10,
@@ -119,6 +122,9 @@
             opacity: 1,
             fillOpacity: 0.8,
         }).addTo(map);
+
+        const waterLevelText = device.water_level ? device.water_level.toFixed(1) + ' cm' : '—';
+        const riskScoreText = Math.round(device.risk_score);
 
         const popupContent = `
             <div class="min-w-48">
@@ -131,7 +137,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span>Ketinggian Air:</span>
-                        <span class="font-mono">${device.water_level ? device.water_level.toFixed(1) + ' cm' : '—'}</span>
+                        <span class="font-mono">${waterLevelText}</span>
                     </div>
                     <div class="flex justify-between">
                         <span>Risiko:</span>
@@ -139,7 +145,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span>Score:</span>
-                        <span class="font-mono">${device.risk_score.toFixed(0)}</span>
+                        <span class="font-mono">${riskScoreText}</span>
                     </div>
                     <div class="flex justify-between">
                         <span>Evaluasi:</span>
@@ -158,6 +164,15 @@
             map.setView([device.latitude, device.longitude], 14);
         });
     });
+
+    // Auto-navigate to device location(s)
+    if (validDevices.length === 1) {
+        const device = validDevices[0];
+        map.setView([device.latitude, device.longitude], 14);
+    } else if (validDevices.length > 1) {
+        const bounds = L.latLngBounds(validDevices.map(d => [d.latitude, d.longitude]));
+        map.fitBounds(bounds, { padding: [50, 50] });
+    }
 </script>
 
 <style>
