@@ -48,13 +48,54 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
+{{-- Windy Embed API --}}
+<script src="https://embed.windy.com/assets/libBoot.js"></script>
+
 <script>
     const devices = @json($devices);
 
     const map = L.map('map').setView([-6.2, 107], 10);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+    // Basemap layers
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
         maxZoom: 19,
+        name: 'OpenStreetMap',
+    });
+
+    const satelliteLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {
+            attribution: 'Tiles © Esri',
+            maxZoom: 19,
+            name: 'Satelit',
+        }
+    );
+
+    // Set default layer
+    osmLayer.addTo(map);
+
+    // Windy layer (using tile server)
+    const windyLayer = L.tileLayer(
+        'https://tiles.windy.com/tiles/wind_new/{z}/{x}/{y}.png',
+        {
+            attribution: '© Windy',
+            maxZoom: 19,
+            name: 'Windy (Angin)',
+            opacity: 0.7,
+        }
+    );
+
+    // Layer control
+    const baseLayers = {
+        'OpenStreetMap': osmLayer,
+        'Satelit': satelliteLayer,
+        'Windy (Angin)': windyLayer,
+    };
+
+    L.control.layers(baseLayers, null, {
+        collapsed: false,
+        position: 'topright',
     }).addTo(map);
 
     const riskColors = {
