@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('notification_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('device_id')->index();
+            $table->uuid('user_id')->nullable()->index();
             $table->string('type')->default('telegram'); // telegram, email, sms
             $table->text('message');
             $table->string('recipient')->nullable(); // phone number, email, etc
@@ -24,6 +25,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('device_id')->references('id')->on('devices')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $table->index(['created_at', 'type']);
         });
     }

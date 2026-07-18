@@ -20,52 +20,67 @@ class TelegramService
         $this->chatId = config('services.telegram.chat_id') ?? env('TELEGRAM_CHAT_ID', '');
     }
 
-    public function sendAlertNotification(Device $device, string $riskLevel, string $message): NotificationLog
+    public function sendAlertNotification(Device $device, string $riskLevel, string $message): array
     {
-        $telegramMessage = $this->formatAlertMessage($device, $riskLevel, $message);
+        $users = $device->users;
+        $notificationLogs = [];
 
-        $notificationLog = NotificationLog::create([
-            'device_id' => $device->id,
-            'type' => 'telegram',
-            'message' => $telegramMessage,
-            'recipient' => $this->chatId,
-            'status' => 'pending',
-        ]);
-
-        try {
-            $response = $this->sendMessage($telegramMessage);
-
-            if ($response['ok'] ?? false) {
-                $notificationLog->update([
-                    'status' => 'sent',
-                    'external_id' => $response['result']['message_id'] ?? null,
-                    'sent_at' => now(),
-                ]);
-
-                Log::channel('telegram')->info('Alert notification sent', [
-                    'device_id' => $device->id,
-                    'message_id' => $response['result']['message_id'] ?? null,
-                ]);
-            } else {
-                $this->handleError($notificationLog, 'Telegram API error: ' . json_encode($response));
+        foreach ($users as $user) {
+            if (empty($user->telegram_chat_id)) {
+                continue;
             }
-        } catch (\Exception $e) {
-            $this->handleError($notificationLog, $e->getMessage());
+
+            $telegramMessage = $this->formatAlertMessage($device, $riskLevel, $message);
+
+            $notificationLog = NotificationLog::create([
+                'device_id' => $device->id,
+                'user_id' => $user->id,
+                'type' => 'telegram',
+                'message' => $telegramMessage,
+                'recipient' => $user->telegram_chat_id,
+                'status' => 'pending',
+            ]);
+
+            try {
+                $response = $this->sendMessage($telegramMessage, $user->telegram_chat_id);
+
+                if ($response['ok'] ?? false) {
+                    $notificationLog->update([
+                        'status' => 'sent',
+                        'external_id' => $response['result']['message_id'] ?? null,
+                        'sent_at' => now(),
+                    ]);
+
+                    Log::channel('telegram')->info('Alert notification sent', [
+                        'device_id' => $device->id,
+                        'user_id' => $user->id,
+                        'message_id' => $response['result']['message_id'] ?? null,
+                    ]);
+                } else {
+                    $this->handleError($notificationLog, 'Telegram API error: ' . json_encode($response));
+                }
+            } catch (\Exception $e) {
+                $this->handleError($notificationLog, $e->getMessage());
+            }
+
+            $notificationLogs[] = $notificationLog->refresh();
         }
 
-        return $notificationLog->refresh();
+        return $notificationLogs;
     }
 
-    public function sendMessage(string $text): array
+    public function sendMessage(string $text, ?string $chatId = null): array
     {
-        if (empty($this->botToken) || empty($this->chatId)) {
+        $chatId = $chatId ?? $this->chatId;
+
+        if (empty($this->botToken) || empty($chatId)) {
             return ['ok' => false, 'error' => 'Telegram credentials not configured'];
         }
 
         try {
             $response = Http::timeout(10)
                 ->post("https://api.telegram.org/bot{$this->botToken}/sendMessage", [
-                    'chat_id' => $this->chatId,
+                    'chat_id' => $chatId,
                     'text' => $text,
                     'parse_mode' => 'HTML',
                 ])

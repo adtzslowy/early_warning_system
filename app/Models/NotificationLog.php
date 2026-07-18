@@ -12,6 +12,7 @@ class NotificationLog extends Model
 
     protected $fillable = [
         'device_id',
+        'user_id',
         'type',
         'message',
         'recipient',
@@ -33,6 +34,11 @@ class NotificationLog extends Model
     public function device(): BelongsTo
     {
         return $this->belongsTo(Device::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function isSent(): bool
