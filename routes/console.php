@@ -108,14 +108,19 @@ Schedule::command(RefreshPredictions::class)
  * Refresh cache data prakiraan maritim BMKG
  * Interval: Setiap 1 jam
  * Purpose: Hangatkan cache BMKG untuk generator data sintetis (demo/dev only)
- * Note: Disable di production jika tidak perlu synthetic data
+ * Status: DISABLED for production (remove if using real IoT data)
+ *
+ * UNCOMMENT hanya jika:
+ * - Development/staging environment
+ * - Membutuhkan synthetic data generator
+ * - Testing tanpa real IoT API
  */
-Schedule::command(RefreshBmkgMaritime::class)
-    ->hourly()
-    ->withoutOverlapping()
-    ->onSuccess(function () {
-        \Illuminate\Support\Facades\Log::channel('scheduler')->info('✅ bmkg:maritime completed');
-    });
+// Schedule::command(RefreshBmkgMaritime::class)
+//     ->hourly()
+//     ->withoutOverlapping()
+//     ->onSuccess(function () {
+//         \Illuminate\Support\Facades\Log::channel('scheduler')->info('✅ bmkg:maritime completed');
+//     });
 
 // ─────────────────────────────────────────────────────────────────────────
 // 4. MAINTENANCE & CLEANUP (Optional - Uncomment jika perlu)
