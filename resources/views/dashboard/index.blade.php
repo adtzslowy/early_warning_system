@@ -440,30 +440,33 @@
             target.innerHTML = '';
 
             const accent = '#6366f1';
+            const getCSSVar = (varName) => getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+
             predictionChart = new window.ApexCharts(target, {
                 chart: {
                     type: 'area',
-                    height: 224,
+                    height: 240,
                     toolbar: { show: false },
                     animations: { enabled: true },
                     background: 'transparent',
+                    sparkline: { enabled: false },
                 },
                 series: predictionSeries(),
                 colors: [accent],
-                stroke: { width: 2.5, curve: 'monotoneCubic', lineCap: 'round', dashArray: 5 },
+                stroke: { width: 3, curve: 'monotoneCubic', lineCap: 'round', dashArray: 5 },
                 markers: {
-                    size: 0,
-                    strokeWidth: 2,
+                    size: 5,
+                    strokeWidth: 0,
                     colors: [accent],
-                    strokeColors: 'var(--color-surface)',
-                    hover: { size: 5 },
+                    strokeColors: accent,
+                    hover: { size: 7 },
                 },
                 fill: {
                     type: 'gradient',
                     gradient: {
-                        shadeIntensity: 0.45,
-                        opacityFrom: 0.35,
-                        opacityTo: 0.05,
+                        shadeIntensity: 0.5,
+                        opacityFrom: 0.45,
+                        opacityTo: 0.08,
                         stops: [0, 70, 100],
                     },
                 },
@@ -471,10 +474,20 @@
                 grid: {
                     borderColor: 'var(--color-border)',
                     strokeDashArray: 4,
+                    padding: { left: 0, right: 0 },
+                },
+                plotOptions: {
+                    area: {
+                        fillTo: 'origin',
+                    },
                 },
                 xaxis: {
                     type: 'datetime',
-                    labels: { style: { colors: 'var(--color-text-muted)' }, datetimeUTC: false },
+                    labels: {
+                        style: { colors: 'var(--color-text-muted)', fontSize: '11px' },
+                        datetimeUTC: false,
+                        format: 'HH:mm',
+                    },
                     axisBorder: { color: 'var(--color-border)' },
                     axisTicks: { color: 'var(--color-border)' },
                 },
@@ -482,20 +495,23 @@
                     paddedBounds(predictionSeries()[0].data, 15),
                     {
                         labels: {
-                            style: { colors: 'var(--color-text-muted)' },
+                            style: { colors: 'var(--color-text-muted)', fontSize: '11px' },
                             formatter: function (value) {
-                                return fmt(value, 1);
+                                return fmt(value, 0) + ' cm';
                             },
                         },
                     },
                 ),
                 tooltip: {
                     theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-                    x: { format: 'HH:mm' },
+                    x: { format: 'dd MMM HH:mm' },
                     y: {
                         formatter: function (value) {
                             return fmt(value, 1) + ' cm';
                         },
+                    },
+                    style: {
+                        fontSize: '12px',
                     },
                 },
                 noData: {
