@@ -109,64 +109,15 @@
                 <div id="telemetryChart" class="h-72 w-full"></div>
             </div>
 
-            <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
+            <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
                 @foreach ($telemetry as [$key, $label, $value, $unit, $decimals])
-                    <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4" data-telemetry-card="{{ $key }}">
-                        <p class="text-xs font-medium text-[var(--color-text-muted)]">{{ $label }}</p>
-                        <p class="mt-1.5 font-mono text-lg font-semibold" data-rt-telemetry="{{ $key }}" data-decimals="{{ $decimals }}">
-                            {{ $value !== null ? number_format($value, $decimals) : '—' }}<span class="text-xs text-[var(--color-text-muted)]"> {{ $unit }}</span>
+                    <div class="group rounded-lg border border-[var(--color-border)] bg-gradient-to-br from-[var(--color-surface-2)] to-[var(--color-surface)] p-3 transition-all duration-200 hover:border-[var(--color-accent)] hover:shadow-lg" data-telemetry-card="{{ $key }}">
+                        <p class="text-xs font-medium text-[var(--color-text-muted)] group-hover:text-[var(--color-accent)] transition-colors">{{ $label }}</p>
+                        <p class="mt-2 font-mono text-lg font-bold" data-rt-telemetry="{{ $key }}" data-decimals="{{ $decimals }}">
+                            {{ $value !== null ? number_format($value, $decimals) : '—' }}<span class="text-xs font-normal text-[var(--color-text-muted)]"> {{ $unit }}</span>
                         </p>
                     </div>
                 @endforeach
-            </div>
-
-            {{-- Widget Kecepatan & Arah Angin --}}
-            <div class="mt-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-2)] p-4">
-                <p class="mb-3 text-xs font-medium text-[var(--color-text-muted)]">Kecepatan & Arah Angin</p>
-                <div class="flex items-center justify-between gap-4">
-                    {{-- Kecepatan --}}
-                    <div class="flex flex-col">
-                        <p class="text-xs text-[var(--color-text-muted)]">Kecepatan</p>
-                        <p class="mt-1 font-mono text-xl font-bold" data-rt-telemetry="wind_speed" data-decimals="1">
-                            {{ $selected['wind_speed'] !== null ? number_format($selected['wind_speed'], 1) : '—' }}<span class="text-xs text-[var(--color-text-muted)]"> m/s</span>
-                        </p>
-                    </div>
-
-                    {{-- Panah Kompas --}}
-                    <div class="flex flex-col items-center">
-                        <div class="relative h-16 w-16">
-                            <svg viewBox="0 0 100 100" class="h-full w-full" style="filter: drop-shadow(0 0 1px var(--color-text-muted));">
-                                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" stroke-width="1" opacity="0.2"/>
-                                <g data-wind-arrow transform="rotate({{ $selected['wind_direction'] ?? 0 }} 50 50)">
-                                    <line x1="50" y1="15" x2="50" y2="45" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                                    <polygon points="50,10 45,20 55,20" fill="currentColor"/>
-                                </g>
-                                <circle cx="50" cy="50" r="2.5" fill="currentColor"/>
-                            </svg>
-                        </div>
-                        <p class="mt-1 text-[10px] font-mono text-[var(--color-text-muted)]">
-                            <span data-rt-telemetry="wind_direction" data-decimals="0">{{ $selected['wind_direction'] !== null ? number_format($selected['wind_direction'], 0) : '—' }}</span>°
-                        </p>
-                    </div>
-
-                    {{-- Arah Kardinał --}}
-                    <div class="flex flex-col text-right">
-                        <p class="text-xs text-[var(--color-text-muted)]">Arah</p>
-                        <p class="mt-1 text-lg font-bold" data-wind-label>
-                            @php
-                                $windDir = $selected['wind_direction'];
-                                $directions = ['U', 'TL', 'T', 'TG', 'G', 'BG', 'B', 'BD'];
-                                $dirLabel = '—';
-                                if ($windDir !== null) {
-                                    $idx = round((($windDir % 360) + 22.5) / 45) % 8;
-                                    $dirLabel = $directions[$idx];
-                                }
-                                echo $dirLabel;
-                            @endphp
-                        </p>
-                        <p class="text-[10px] text-[var(--color-text-muted)]">kardinal</p>
-                    </div>
-                </div>
             </div>
         </x-card>
         @endif
