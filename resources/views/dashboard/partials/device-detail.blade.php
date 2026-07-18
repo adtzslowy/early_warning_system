@@ -78,20 +78,17 @@
             @endphp
 
             <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex flex-wrap gap-2" role="tablist" aria-label="Pilih grafik telemetri">
-                    @foreach ($telemetry as [$key, $label, $value, $unit, $decimals])
-                        <button
-                            type="button"
-                            data-telemetry-tab="{{ $key }}"
-                            @class([
-                                'inline-flex h-8 items-center rounded-lg border px-3 text-xs font-medium transition-colors',
-                                'border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-accent-foreground)]' => $key === $prefs['chart_metric'],
-                                'border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-2)]' => $key !== $prefs['chart_metric'],
-                            ])
-                        >
-                            {{ $label }}
-                        </button>
-                    @endforeach
+                <div class="flex items-center gap-2">
+                    <label for="telemetrySelect" class="text-xs font-medium text-[var(--color-text-muted)]">Metrik</label>
+                    <select
+                        id="telemetrySelect"
+                        data-telemetry-select
+                        class="h-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 text-xs font-medium transition-colors hover:bg-[var(--color-surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                    >
+                        @foreach ($telemetry as [$key, $label, $value, $unit, $decimals])
+                            <option value="{{ $key }}" @selected($key === $prefs['chart_metric'])>{{ $label }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="ml-auto flex items-center gap-2">

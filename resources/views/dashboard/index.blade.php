@@ -266,12 +266,11 @@
         function selectTelemetry(key) {
             activeTelemetry = key;
 
-            document.querySelectorAll('[data-telemetry-tab]').forEach(function (tab) {
-                const active = tab.dataset.telemetryTab === key;
-                tab.className = active
-                    ? 'inline-flex h-8 items-center rounded-lg border border-[var(--color-accent)] bg-[var(--color-accent)] px-3 text-xs font-medium text-[var(--color-accent-foreground)] transition-colors'
-                    : 'inline-flex h-8 items-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-xs font-medium transition-colors hover:bg-[var(--color-surface-2)]';
-            });
+            // Update dropdown value
+            const telemetrySelect = document.querySelector('[data-telemetry-select]');
+            if (telemetrySelect) {
+                telemetrySelect.value = key;
+            }
 
             document.querySelectorAll('[data-telemetry-card]').forEach(function (card) {
                 card.classList.toggle('ring-1', card.dataset.telemetryCard === key);
@@ -380,11 +379,12 @@
             });
 
             telemetryChart.render();
-            document.querySelectorAll('[data-telemetry-tab]').forEach(function (tab) {
-                tab.addEventListener('click', function () {
-                    selectTelemetry(tab.dataset.telemetryTab);
+            const telemetrySelect = document.querySelector('[data-telemetry-select]');
+            if (telemetrySelect) {
+                telemetrySelect.addEventListener('change', function () {
+                    selectTelemetry(this.value);
                 });
-            });
+            }
             const rangeSelect = document.querySelector('[data-range-select]');
             if (rangeSelect) {
                 rangeSelect.addEventListener('change', function () {
