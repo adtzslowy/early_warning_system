@@ -12,7 +12,6 @@
                 ['label' => 'Devices', 'route' => 'devices', 'icon' => 'heroicon-o-cpu-chip'],
                 ['label' => 'Sensor', 'route' => 'sensors', 'icon' => 'heroicon-o-signal'],
                 ['label' => 'Monitoring', 'route' => 'monitoring', 'icon' => 'heroicon-o-chart-bar'],
-                ['label' => 'Locations', 'route' => 'locations', 'icon' => 'heroicon-o-map-pin'],
             ],
         ],
         [

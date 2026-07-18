@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\MonitoringController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SensorController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
@@ -147,3 +148,7 @@ Route::prefix('alert')->middleware(['auth', 'permission:view alert'])
     ->group(function() {
         Route::get('/', [AlertController::class, 'index'])->name('alerts');
     });
+
+Route::get('/notifications/log', [NotificationController::class, 'log'])
+    ->middleware(['auth', 'permission:view notifications'])
+    ->name('notifications.log');
