@@ -176,7 +176,7 @@
                                 <span x-text="showPassword ? 'Batalkan' : 'Hapus Akun'">Hapus Akun</span>
                             </button>
                             <x-button type="submit" variant="primary" x-show="showPassword" x-cloak
-                                :disabled="!$confirmed"
+                                :disabled="!confirmed"
                                 class="disabled:opacity-50 disabled:cursor-not-allowed">
                                 Konfirmasi Hapus
                             </x-button>
