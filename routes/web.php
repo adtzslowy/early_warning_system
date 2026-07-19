@@ -3,6 +3,7 @@
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\Api\MockRobController;
 use App\Http\Controllers\Authentication\AuthController;
+use App\Http\Controllers\Authentication\ForgotPasswordController;
 use App\Http\Controllers\Authentication\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeviceController;
@@ -36,6 +37,13 @@ Route::prefix('sign-in')
 Route::middleware('guest')->group(function () {
     Route::get('/sign-up', [RegisterController::class, 'index'])->name('register');
     Route::post('/sign-up', [RegisterController::class, 'store'])->name('register.store');
+});
+
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showRequestForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp'])->name('password.email');
+    Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showVerifyForm'])->name('password.verify.form');
+    Route::post('/reset-password', [ForgotPasswordController::class, 'verifyAndResetPassword'])->name('password.update');
 });
 
 Route::middleware('guest')->group(function () {
