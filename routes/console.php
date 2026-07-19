@@ -90,6 +90,18 @@ Schedule::command(RefreshPredictions::class)
     });
 
 /**
+ * Sync device status dari ROB API
+ * Interval: Setiap 1 menit
+ * Purpose: Update device status (online/offline) dari IoT endpoint
+ */
+Schedule::command('devices:sync-from-rob')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->onSuccess(function () {
+        \Illuminate\Support\Facades\Log::channel('scheduler')->info('✅ devices:sync-from-rob completed');
+    });
+
+/**
  * Refresh cache data prakiraan maritim BMKG
  * Interval: Setiap 1 jam
  * Purpose: Hangatkan cache BMKG untuk generator data sintetis (demo/dev only)
