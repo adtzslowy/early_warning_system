@@ -57,6 +57,15 @@ class RolePermissionSeeder extends Seeder
             "edit devices",
         ]);
 
+        $viewer = Role::firstOrCreate(["name" => "viewer"]);
+        $viewer->givePermissionTo([
+            "view dashboard",
+            "view monitoring",
+            "view prediction",
+            "view devices",
+            "view sensors",
+        ]);
+
         User::firstOrCreate(
             ["email" => "aditzkun0987@gmail.com"],
             [
