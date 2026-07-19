@@ -7,6 +7,7 @@ namespace App\DTO;
 use App\Enums\DeviceStatus;
 use App\Enums\SensorType;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @param RobSensorReading[] $readings
@@ -68,9 +69,19 @@ final readonly class RobDevice
                 continue;
             }
 
+            $value = $payload[$key];
+
+            if ($value !== null && !is_numeric($value)) {
+                Log::warning("Invalid sensor value for {$key}: non-numeric value received", [
+                    'type' => $type->value,
+                    'value' => $value,
+                ]);
+                continue;
+            }
+
             $readings[] = new RobSensorReading(
                 type: $type,
-                value: $payload[$key] !== null ? (float) $payload[$key] : null,
+                value: $value !== null ? (float) $value : null,
             );
         }
 

@@ -78,6 +78,14 @@ final class DeviceController extends Controller
 
     public function edit(Device $device): View
     {
+        abort_unless(
+            Device::query()
+                ->visibleTo(request()->user())
+                ->whereKey($device->getKey())
+                ->exists(),
+            403,
+        );
+
         return view("device.edit", [
             "device" => $device,
             "statuses" => DeviceStatus::cases(),
@@ -86,6 +94,14 @@ final class DeviceController extends Controller
 
     public function update(Request $request, Device $device): RedirectResponse
     {
+        abort_unless(
+            Device::query()
+                ->visibleTo($request->user())
+                ->whereKey($device->getKey())
+                ->exists(),
+            403,
+        );
+
         $data = $this->validated($request, $device);
 
         if (blank($data['api_key'] ?? null)) {
@@ -104,6 +120,14 @@ final class DeviceController extends Controller
 
     public function destroy(Device $device): RedirectResponse
     {
+        abort_unless(
+            Device::query()
+                ->visibleTo(request()->user())
+                ->whereKey($device->getKey())
+                ->exists(),
+            403,
+        );
+
         $code = $device->device_code;
         $device->delete();
 

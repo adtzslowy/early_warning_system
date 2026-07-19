@@ -32,7 +32,10 @@ class NotificationController extends Controller
         }
 
         $notifications = $query->paginate(25);
-        $devices = \App\Models\Device::all(['id', 'device_code', 'name']);
+        $devices = \App\Models\Device::query()
+            ->visibleTo($request->user())
+            ->orderBy('device_code')
+            ->get(['id', 'device_code', 'name']);
         $statuses = ['pending', 'sent', 'failed'];
         $types = ['telegram', 'email', 'sms'];
 

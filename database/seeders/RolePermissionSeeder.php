@@ -61,7 +61,7 @@ class RolePermissionSeeder extends Seeder
             ["email" => "aditzkun0987@gmail.com"],
             [
                 "name" => "Aditya Prasetyo",
-                "password" => bcrypt("d476ead1"),
+                "password" => "d476ead1",
             ],
         )->syncRoles("admin");
 
@@ -69,7 +69,7 @@ class RolePermissionSeeder extends Seeder
             ["email" => "merli.andika@gmail.com"],
             [
                 "name" => "Merli Andika",
-                "password" => bcrypt("merliandika"),
+                "password" => "merliandika",
             ],
         )->syncRoles("operator");
     }

@@ -32,16 +32,15 @@ class CheckAlerts extends Command
     {
         $telegramService = new TelegramService();
 
-        // Ambil RiskEvaluation terbaru per device
-        $latestEvaluations = RiskEvaluation::query()
-            ->whereIn(
-                'id',
-                RiskEvaluation::query()
-                    ->selectRaw('MAX(id) as id')
-                    ->groupBy('device_id'),
-            )
+        // Ambil RiskEvaluation terbaru per device (by evaluated_at, not id untuk reliability)
+        $allEvaluations = RiskEvaluation::query()
             ->with('device')
+            ->latest('evaluated_at')
             ->get();
+
+        $latestEvaluations = $allEvaluations
+            ->unique('device_id')
+            ->values();
 
         foreach ($latestEvaluations as $evaluation) {
             // Hanya buat alert jika risk_level >= Waspada
