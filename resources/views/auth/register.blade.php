@@ -56,46 +56,6 @@
                 <div class="absolute top-1/3 right-0 h-56 w-56 rounded-full bg-black/20 blur-3xl"></div>
             </div>
 
-            <div class="relative z-10 flex items-center gap-3">
-                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur">
-                    <x-heroicon-o-signal class="h-6 w-6" />
-                </div>
-                <span class="font-display text-lg font-bold tracking-tight">EWS Banjir Rob</span>
-            </div>
-
-            <div class="relative z-10 max-w-sm">
-                <h2 class="font-display text-3xl font-bold leading-tight xl:text-4xl">
-                    Gabung &amp; pantau risiko banjir rob wilayahmu.
-                </h2>
-                <ul class="mt-8 space-y-4 text-sm text-white/90">
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
-                            <x-heroicon-o-bolt class="h-4 w-4" />
-                        </span>
-                        Peringatan dini otomatis berbasis multi-faktor
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
-                            <x-heroicon-o-device-phone-mobile class="h-4 w-4" />
-                        </span>
-                        Akses dari mana saja lewat browser
-                    </li>
-                    <li class="flex items-center gap-3">
-                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/15">
-                            <x-heroicon-o-shield-check class="h-4 w-4" />
-                        </span>
-                        Verifikasi email untuk keamanan akun
-                    </li>
-                </ul>
-            </div>
-
-            <div class="relative z-10 flex items-center gap-2 text-xs text-white/80">
-                <span class="relative flex h-2.5 w-2.5">
-                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70"></span>
-                    <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
-                </span>
-                Memantau Perairan Ketapang — Selat Karimata
-            </div>
 
             <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 h-40 overflow-hidden">
                 <svg class="wave wave-1 absolute bottom-0 h-24 w-[200%]" viewBox="0 0 1440 120" preserveAspectRatio="none" fill="currentColor">
