@@ -172,7 +172,7 @@
                         <div class="flex gap-3 pt-4">
                             <button type="button" @click="showPassword = !showPassword"
                                 class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--color-bahaya)] px-3 text-sm font-medium transition-colors text-[var(--color-bahaya)] hover:bg-[color-mix(in_srgb,var(--color-bahaya)_12%,transparent)]">
-                                <x-heroicon-o-trash-2 class="h-4 w-4" />
+                                <x-heroicon-o-trash class="h-4 w-4" />
                                 {{ $showPassword ? 'Batalkan' : 'Hapus Akun' }}
                             </button>
                             <x-button type="submit" variant="primary" x-show="showPassword" x-cloak
