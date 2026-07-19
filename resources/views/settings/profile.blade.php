@@ -135,6 +135,54 @@
                         <x-button type="submit" variant="primary">Simpan Profil</x-button>
                     </div>
                 </form>
+
+                {{-- Delete Account Section --}}
+                <x-card title="Hapus Akun" subtitle="Tindakan ini tidak dapat dibatalkan" class="border-[var(--color-bahaya)]/30">
+                    <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+                        Menghapus akun Anda akan menghapus semua data profil dan riwayat yang terkait. Proses ini permanen dan tidak dapat dibatalkan.
+                    </p>
+
+                    <form method="POST" action="{{ route('settings.account.delete') }}"
+                        x-data="{ showPassword: false, confirmed: false }"
+                        @submit.prevent="if(confirmed) $el.submit(); else alert('Silakan konfirmasi untuk melanjutkan')"
+                        class="space-y-4">
+                        @csrf
+                        @method('DELETE')
+
+                        <div x-show="showPassword" x-cloak class="space-y-4 border-t border-[var(--color-border)] pt-4">
+                            <div>
+                                <label for="password_confirm" class="mb-1.5 block text-sm font-medium">Password Akun</label>
+                                <input id="password_confirm" type="password" name="password"
+                                    class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                                    required>
+                                @error('password')
+                                    <p class="mt-1 text-sm text-[var(--color-bahaya)]">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <label class="flex items-start gap-2">
+                                <input type="checkbox" x-model="confirmed" value="1"
+                                    class="mt-1 h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-bahaya)]">
+                                <span class="text-sm text-[var(--color-text-muted)]">
+                                    Saya memahami bahwa menghapus akun ini adalah tindakan permanen dan tidak dapat dibatalkan.
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" @click="showPassword = !showPassword"
+                                class="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--color-bahaya)] px-3 text-sm font-medium transition-colors text-[var(--color-bahaya)] hover:bg-[color-mix(in_srgb,var(--color-bahaya)_12%,transparent)]">
+                                <x-heroicon-o-trash-2 class="h-4 w-4" />
+                                {{ $showPassword ? 'Batalkan' : 'Hapus Akun' }}
+                            </button>
+                            <x-button type="submit" variant="primary" x-show="showPassword" x-cloak
+                                :disabled="!$confirmed"
+                                class="disabled:opacity-50 disabled:cursor-not-allowed">
+                                Konfirmasi Hapus
+                            </x-button>
+                        </div>
+                    </form>
+                </x-card>
             </div>
         </div>
     </div>
