@@ -93,7 +93,10 @@ final class DashboardController extends Controller
             "latestRiskEvaluation",
         ]);
 
-        return response()->json($this->toRealtimePayload($device));
+        $payload = $this->toRealtimePayload($device);
+        $payload["telemetry_history"] = $this->telemetryHistory($device, limit: 100);
+
+        return response()->json($payload);
     }
 
     /**
@@ -218,7 +221,7 @@ final class DashboardController extends Controller
             ->all();
     }
 
-    private function telemetryHistory(Device $device): array
+    private function telemetryHistory(Device $device, int $limit = 500): array
     {
         $types = collect([
             SensorType::Temperature,
@@ -232,7 +235,7 @@ final class DashboardController extends Controller
             ->where("device_id", $device->id)
             ->whereIn("type", $types->map->value)
             ->latest("recorded_at")
-            ->limit(500)
+            ->limit($limit)
             ->get(["type", "value", "recorded_at"])
             ->sortBy("recorded_at")
             ->groupBy(fn(Sensor $sensor) => $sensor->type->value);

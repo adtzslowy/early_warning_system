@@ -561,6 +561,28 @@
 
             // KPI atas kalau device ini yang sedang dipilih
             if (e.device_code === SELECTED) {
+                // ── Update telemetry history jika ada di response (dari polling/snapshot)
+                // Merge data baru dari server dengan history yang ada untuk menjaga continuity chart
+                if (e.telemetry_history && typeof e.telemetry_history === 'object') {
+                    Object.keys(e.telemetry_history).forEach(function (key) {
+                        if (!TELEMETRY_HISTORY[key]) TELEMETRY_HISTORY[key] = [];
+                        const newPoints = e.telemetry_history[key] || [];
+                        const existingTimestamps = new Set(TELEMETRY_HISTORY[key].map(function (p) { return p[0]; }));
+                        newPoints.forEach(function (point) {
+                            if (!existingTimestamps.has(point[0])) {
+                                TELEMETRY_HISTORY[key].push(point);
+                                existingTimestamps.add(point[0]);
+                            }
+                        });
+                        TELEMETRY_HISTORY[key].sort(function (a, b) { return a[0] - b[0]; });
+                    });
+                    if (telemetryChart) {
+                        const meta = TELEMETRY_META[activeTelemetry];
+                        const data = telemetrySeries(activeTelemetry)[0].data;
+                        telemetryChart.updateSeries(telemetrySeries(activeTelemetry), false);
+                    }
+                }
+
                 // ── Data sensor LIVE: selalu perbarui tiap poll, JANGAN di-gate
                 // ke timestamp evaluasi fuzzy. Ketinggian air, telemetri & status
                 // adalah pembacaan sensor langsung (sumber sama dgn baris tabel).
