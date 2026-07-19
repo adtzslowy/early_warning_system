@@ -10,9 +10,12 @@ use Illuminate\View\View;
 
 class MonitoringController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $user = $request->user();
+
         $devices = Device::query()
+            ->visibleTo($user)
             ->with(['riskEvaluations' => function ($query) {
                 $query->latest('evaluated_at')->limit(1);
             }])

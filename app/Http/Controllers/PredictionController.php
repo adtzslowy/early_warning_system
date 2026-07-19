@@ -6,13 +6,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Device;
 use App\Prediction\WaterLevelPredictor;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PredictionController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $devices = Device::query()
+            ->visibleTo($request->user())
             ->with(['latestWaterLevel', 'latestRiskEvaluation'])
             ->orderBy('device_code')
             ->get(['id', 'device_code', 'name', 'location', 'status']);
