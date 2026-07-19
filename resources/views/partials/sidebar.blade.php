@@ -4,31 +4,25 @@
     $menu = [
         [
             'group' => null,
-            'items' => [['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'heroicon-o-home']],
+            'items' => [['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'heroicon-o-home', 'can' => 'view dashboard']],
         ],
         [
             'group' => 'Master Data',
             'items' => [
-                ['label' => 'Devices', 'route' => 'devices', 'icon' => 'heroicon-o-cpu-chip'],
-                ['label' => 'Sensor', 'route' => 'sensors', 'icon' => 'heroicon-o-signal'],
-                ['label' => 'Monitoring', 'route' => 'monitoring', 'icon' => 'heroicon-o-chart-bar'],
+                ['label' => 'Devices', 'route' => 'devices', 'icon' => 'heroicon-o-cpu-chip', 'can' => 'view devices'],
+                ['label' => 'Sensor', 'route' => 'sensors', 'icon' => 'heroicon-o-signal', 'can' => 'view sensors'],
+                ['label' => 'Monitoring', 'route' => 'monitoring', 'icon' => 'heroicon-o-chart-bar', 'can' => 'view monitoring'],
             ],
         ],
         [
             'group' => 'Analitik & Peringatan',
             'items' => [
-                ['label' => 'Prediction', 'route' => 'prediction', 'icon' => 'heroicon-o-arrow-trending-up'],
-                ['label' => 'Alert', 'route' => 'alerts', 'icon' => 'heroicon-o-exclamation-circle'],
-                ['label' => 'Notification Log', 'route' => 'notifications.log', 'icon' => 'heroicon-o-bell'],
+                ['label' => 'Prediction', 'route' => 'prediction', 'icon' => 'heroicon-o-arrow-trending-up', 'can' => 'view prediction'],
+                ['label' => 'Alert', 'route' => 'alerts', 'icon' => 'heroicon-o-exclamation-circle', 'can' => 'view alert'],
+                ['label' => 'Notification Log', 'route' => 'notifications.log', 'icon' => 'heroicon-o-bell', 'can' => 'view notifications'],
             ],
         ],
 
-        [
-            'group' => 'Administrasi',
-            'items' => [
-                ['label' => 'User Manajemen', 'route' => 'users', 'icon' => 'heroicon-o-users', 'can' => 'view users'],
-            ],
-        ],
     ];
 @endphp
 

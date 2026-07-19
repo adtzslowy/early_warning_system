@@ -96,4 +96,27 @@ final class SettingsController extends Controller
             ->route('settings.profile')
             ->with('status', 'Profil berhasil diperbarui.');
     }
+
+    public function deleteAccount(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        Auth::logout();
+
+        if ($user->foto_profil) {
+            Storage::disk('public')->delete($user->foto_profil);
+        }
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')
+            ->with('status', 'Akun Anda telah dihapus.');
+    }
 }

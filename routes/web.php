@@ -13,7 +13,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PredictionController;
 use App\Http\Controllers\SensorController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\UserController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -121,30 +120,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::get('/settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
     Route::patch('/settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::delete('/settings/account', [SettingsController::class, 'deleteAccount'])->name('settings.account.delete');
 });
-
-Route::prefix('users')
-    ->middleware(['auth'])
-    ->group(function () {
-        Route::get('/', [UserController::class, 'index'])
-            ->middleware('permission:view users')
-            ->name('users');
-        Route::get('/create', [UserController::class, 'create'])
-            ->middleware('permission:create users')
-            ->name('users.create');
-        Route::post('/', [UserController::class, 'store'])
-            ->middleware('permission:create users')
-            ->name('users.store');
-        Route::get('/{user}/edit', [UserController::class, 'edit'])
-            ->middleware('permission:edit users')
-            ->name('users.edit');
-        Route::patch('/{user}', [UserController::class, 'update'])
-            ->middleware('permission:edit users')
-            ->name('users.update');
-        Route::delete('/{user}', [UserController::class, 'destroy'])
-            ->middleware('permission:delete users')
-            ->name('users.destroy');
-    });
 
 Route::prefix('sensor')
     ->middleware(['auth', 'permission:view sensors'])
