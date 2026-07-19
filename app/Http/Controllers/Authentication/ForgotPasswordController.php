@@ -111,6 +111,6 @@ class ForgotPasswordController extends Controller
         $reset->delete();
 
         return redirect()->route('login')
-            ->with('status', '✅ Password berhasil direset. Silakan login dengan password baru Anda.');
+            ->with('status', 'Password berhasil direset. Silakan login dengan password baru Anda.');
     }
 }
