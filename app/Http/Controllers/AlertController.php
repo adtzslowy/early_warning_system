@@ -18,6 +18,7 @@ class AlertController extends Controller
 
         $alerts = Alert::query()
             ->with('device')
+            ->whereHas('device', fn($q) => $q->visibleTo($request->user()))
             ->when($riskLevelFilter, fn($q) => $q->where('risk_level', $riskLevelFilter))
             ->when($deviceFilter, fn($q) => $q->where('device_id', $deviceFilter))
             ->orderByDesc('triggered_at')
@@ -28,6 +29,7 @@ class AlertController extends Controller
             [RiskLevel::Waspada->value, RiskLevel::Siaga->value, RiskLevel::Bahaya->value],
         );
         $devices = \App\Models\Device::query()
+            ->visibleTo($request->user())
             ->orderBy('device_code')
             ->get(['id', 'device_code', 'name']);
 
