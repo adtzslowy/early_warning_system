@@ -13,9 +13,8 @@ class NotificationLog extends Model
     protected $fillable = [
         'device_id',
         'user_id',
-        'type',
         'message',
-        'recipient',
+        'telegram_chat_id',
         'status',
         'external_id',
         'error_message',

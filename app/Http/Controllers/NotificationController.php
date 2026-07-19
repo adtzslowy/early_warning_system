@@ -21,11 +21,6 @@ class NotificationController extends Controller
             $query->where('status', $request->get('status'));
         }
 
-        // Filter by type
-        if ($request->filled('type')) {
-            $query->where('type', $request->get('type'));
-        }
-
         // Filter by device
         if ($request->filled('device_id')) {
             $query->where('device_id', $request->get('device_id'));
@@ -37,15 +32,12 @@ class NotificationController extends Controller
             ->orderBy('device_code')
             ->get(['id', 'device_code', 'name']);
         $statuses = ['pending', 'sent', 'failed'];
-        $types = ['telegram', 'email', 'sms'];
 
         return view('notifications.log', [
             'notifications' => $notifications,
             'devices' => $devices,
             'statuses' => $statuses,
-            'types' => $types,
             'selectedStatus' => $request->get('status', ''),
-            'selectedType' => $request->get('type', ''),
             'selectedDevice' => $request->get('device_id', ''),
         ]);
     }
