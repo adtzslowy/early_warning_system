@@ -14,7 +14,7 @@
 <div class="space-y-6">
     <x-page-header
         title="Notification Log"
-        description="Riwayat notifikasi yang dikirim ke Telegram dan channel lainnya."
+        description="Riwayat notifikasi yang dikirim ke Telegram."
     />
 
     <x-card padding="p-0">
@@ -37,21 +37,6 @@
                 </div>
 
                 <div class="flex-1 min-w-48">
-                    <label for="type" class="block text-sm font-medium text-[var(--color-text)] mb-2">
-                        Type
-                    </label>
-                    <select name="type" id="type"
-                        class="h-9 w-full rounded-lg border border-[var(--color-input)] bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
-                        <option value="">Semua type</option>
-                        @foreach ($types as $type)
-                            <option value="{{ $type }}" @selected($selectedType === $type)>
-                                {{ ucfirst($type) }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="flex-1 min-w-48">
                     <label for="device_id" class="block text-sm font-medium text-[var(--color-text)] mb-2">
                         Device
                     </label>
@@ -68,7 +53,7 @@
 
                 <div class="flex gap-2">
                     <x-button type="submit" variant="primary">Terapkan</x-button>
-                    @if ($selectedStatus !== '' || $selectedType !== '' || $selectedDevice !== '')
+                    @if ($selectedStatus !== '' || $selectedDevice !== '')
                         <x-button href="{{ route('notifications.log') }}" variant="ghost">Reset</x-button>
                     @endif
                 </div>
@@ -88,7 +73,7 @@
                     <thead class="border-b border-[var(--color-border)] text-left text-xs uppercase tracking-wider text-[var(--color-text-muted)]">
                         <tr>
                             <th class="px-4 py-3 font-medium">Device</th>
-                            <th class="px-4 py-3 font-medium">Type</th>
+                            <th class="px-4 py-3 font-medium">Chat ID</th>
                             <th class="px-4 py-3 font-medium">Pesan</th>
                             <th class="px-4 py-3 font-medium">Status</th>
                             <th class="px-4 py-3 font-medium">Waktu</th>
@@ -103,11 +88,8 @@
                                         {{ $notification->device->device_code }}
                                     </a>
                                 </td>
-                                <td class="px-4 py-3">
-                                    <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                                        style="border-color: #0066cc; background-color: color-mix(in srgb, #0066cc 12%, transparent); color: #0066cc;">
-                                        {{ ucfirst($notification->type) }}
-                                    </span>
+                                <td class="px-4 py-3 font-mono text-sm">
+                                    {{ $notification->telegram_chat_id ?? '-' }}
                                 </td>
                                 <td class="px-4 py-3 text-[var(--color-text-muted)] truncate max-w-xs" title="{{ $notification->message }}">
                                     {{ substr($notification->message, 0, 50) }}...
