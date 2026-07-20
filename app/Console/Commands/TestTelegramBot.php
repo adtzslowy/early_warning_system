@@ -36,7 +36,7 @@ class TestTelegramBot extends Command
 
         $testMessage = "<b>✅ EWS Banjir Rob Bot Test</b>\n\n" .
                        "Bot connection successful!\n" .
-                       "Waktu: " . now()->format('d M Y H:i:s') . "\n\n" .
+                       "Waktu: " . now()->timezone('Asia/Jakarta')->format('d M Y H:i:s') . " WIB\n\n" .
                        "Bot siap mengirim notifikasi alert banjir rob.";
 
         $response = $service->sendMessage($testMessage, $chatId);
