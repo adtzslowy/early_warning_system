@@ -44,9 +44,8 @@ class TelegramService
             $notificationLog = NotificationLog::create([
                 'device_id' => $device->id,
                 'user_id' => $user->id,
-                'type' => 'telegram',
                 'message' => $telegramMessage,
-                'recipient' => $user->telegram_chat_id,
+                'telegram_chat_id' => $user->telegram_chat_id,
                 'status' => 'pending',
             ]);
 
