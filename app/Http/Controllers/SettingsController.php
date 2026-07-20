@@ -66,13 +66,17 @@ final class SettingsController extends Controller
     {
         $user = Auth::user();
 
-        // Edit nama/email dimatikan dulu — form ini menangani foto & ganti password.
+        // Edit nama/email dimatikan dulu — form ini menangani foto, password, & telegram chat id.
         $validated = $request->validate([
             'foto_profil' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'], // maks 2MB
             'password' => ['nullable', 'confirmed', Password::min(8)],
-        ], [], [
+            'telegram_chat_id' => ['nullable', 'string', 'regex:/^\d+$/', 'max:50'],
+        ], [
+            'telegram_chat_id.regex' => 'Chat ID Telegram harus berisi angka saja.',
+        ], [
             'foto_profil' => 'foto profil',
             'password' => 'password',
+            'telegram_chat_id' => 'Chat ID Telegram',
         ]);
 
         // Hapus foto lama bila diminta atau akan diganti.
@@ -88,6 +92,11 @@ final class SettingsController extends Controller
         // Ganti password bila diisi (cast 'hashed' di model otomatis meng-hash).
         if (! empty($validated['password'])) {
             $user->password = $validated['password'];
+        }
+
+        // Update Telegram chat ID (allow null/empty untuk disable notifications).
+        if (array_key_exists('telegram_chat_id', $validated)) {
+            $user->telegram_chat_id = $validated['telegram_chat_id'] ?: null;
         }
 
         $user->save();
