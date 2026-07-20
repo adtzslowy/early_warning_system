@@ -6,13 +6,14 @@ namespace App\Console\Commands;
 
 use App\Services\TelegramService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Http;
 
 class TestTelegramBot extends Command
 {
     protected $signature = 'telegram:test {chat_id?}';
     protected $description = 'Test Telegram bot connection with a message';
 
-    public function handle(): int
+    public function handle(TelegramService $service): int
     {
         $chatId = $this->argument('chat_id') ?? config('services.telegram.chat_id');
 
@@ -25,7 +26,13 @@ class TestTelegramBot extends Command
         $this->info("🤖 Testing Telegram bot...");
         $this->info("Chat ID: {$chatId}");
 
-        $service = new TelegramService();
+        // Debug: Check credentials are loaded
+        $token = config('services.telegram.bot_token');
+        if (!$token) {
+            $this->error("❌ Bot token not configured in .env");
+            return self::FAILURE;
+        }
+        $this->line("Token loaded: " . substr($token, 0, 20) . "...");
 
         $testMessage = "<b>✅ EWS Banjir Rob Bot Test</b>\n\n" .
                        "Bot connection successful!\n" .
@@ -36,7 +43,8 @@ class TestTelegramBot extends Command
 
         if ($response['ok'] ?? false) {
             $this->info("✅ Message sent successfully!");
-            $this->line("Message ID: " . $response['result']['message_id'] ?? 'N/A');
+            $this->info("Message ID: " . ($response['result']['message_id'] ?? 'N/A'));
+            $this->info("✅ Bot is working correctly!");
             return self::SUCCESS;
         }
 
