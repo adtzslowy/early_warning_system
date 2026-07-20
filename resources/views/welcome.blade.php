@@ -1,44 +1,45 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>EWS Banjir Rob - Prediksi Banjir Rob Real-time</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800&family=inter:400,500,600,700" rel="stylesheet" />
+    <link href="https://fonts.bunny.net/css?family=space-grotesk:400,500,600,700" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #f1f5f9; }
-        .font-display { font-family: 'Instrument Sans', sans-serif; }
-        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
-        .animate-float { animation: float 3s ease-in-out infinite; }
-        .gradient-text { background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .gradient-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-        .gradient-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2); }
-        .card-glass { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(10px); border: 1px solid rgba(148, 163, 184, 0.1); }
-        .feature-card { transition: all 0.3s ease; }
-        .feature-card:hover { transform: translateY(-5px); }
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gradient-btn {
+            @apply bg-gradient-to-r from-cyan-500 to-emerald-500 text-white hover:shadow-lg transition-all duration-200;
+        }
+        .card-glass {
+            @apply bg-[var(--color-surface-2)] border border-[var(--color-border)] rounded-lg;
+        }
     </style>
 </head>
-<body>
+<body class="bg-[var(--color-bg)] text-[var(--color-text)] font-sans">
     <!-- Navigation -->
-    <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur border-b border-slate-800">
+    <header class="sticky top-0 z-50 bg-[var(--color-bg)]/95 backdrop-blur border-b border-[var(--color-border)]">
         <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex items-center justify-between">
-            <a href="/" class="text-2xl font-bold font-display gradient-text">EWS</a>
+            <a href="/" class="text-2xl font-bold gradient-text">EWS</a>
 
             <nav class="hidden lg:flex items-center gap-8">
-                <a href="#fitur" class="text-sm text-slate-300 hover:text-cyan-400 transition">Fitur</a>
-                <a href="#bagaimana" class="text-sm text-slate-300 hover:text-cyan-400 transition">Bagaimana</a>
-                <a href="#harga" class="text-sm text-slate-300 hover:text-cyan-400 transition">Harga</a>
-                <a href="#faq" class="text-sm text-slate-300 hover:text-cyan-400 transition">FAQ</a>
+                <a href="#fitur" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Fitur</a>
+                <a href="#bagaimana" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Bagaimana</a>
+                <a href="#harga" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Harga</a>
+                <a href="#faq" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">FAQ</a>
             </nav>
 
             <div class="flex items-center gap-3">
                 @auth
                     <a href="{{ route('dashboard') }}" class="px-6 py-2 gradient-btn rounded-lg font-semibold text-sm transition">Dashboard</a>
                 @else
-                    <a href="{{ route('login') }}" class="text-sm text-slate-300 hover:text-white transition">Login</a>
+                    <a href="{{ route('login') }}" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition">Login</a>
                     <a href="{{ route('register') }}" class="px-6 py-2 gradient-btn rounded-lg font-semibold text-sm transition">Daftar Gratis</a>
                 @endauth
             </div>
@@ -101,47 +102,47 @@
 
             <!-- Right: Dashboard Preview -->
             <div class="relative">
-                <div class="card-glass rounded-xl overflow-hidden border border-slate-700">
-                    <div class="bg-slate-900 p-6 border-b border-slate-700">
-                        <p class="text-sm text-slate-400">Dashboard Preview</p>
-                        <h3 class="text-xl font-bold mt-2">Rob Ketapang - Muara</h3>
+                <div class="card-glass overflow-hidden">
+                    <div class="bg-[var(--color-surface)] p-6 border-b border-[var(--color-border)]">
+                        <p class="text-xs text-[var(--color-text-muted)]">Dashboard Preview</p>
+                        <h3 class="text-xl font-bold mt-2 text-[var(--color-accent)]">Rob Ketapang - Muara</h3>
                     </div>
 
                     <!-- Dashboard Content -->
                     <div class="p-6 space-y-4">
                         <!-- Metrics Row 1 -->
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                <p class="text-slate-400 text-xs mb-2">Ketinggian Air</p>
-                                <p class="text-2xl font-bold">45.7 <span class="text-sm text-slate-400">cm</span></p>
+                            <div class="card p-4">
+                                <p class="text-xs text-[var(--color-text-muted)] mb-2">Ketinggian Air</p>
+                                <p class="text-2xl font-bold">45.7 <span class="text-sm text-[var(--color-text-muted)]">cm</span></p>
                                 <div class="mt-3 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
-                                <p class="text-xs text-slate-500 mt-2">⚠️ Waspada</p>
+                                <p class="text-xs text-[var(--color-waspada)] mt-2">⚠️ Waspada</p>
                             </div>
 
-                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                <p class="text-slate-400 text-xs mb-2">Skor Risiko</p>
-                                <p class="text-2xl font-bold text-green-400">45</p>
-                                <p class="text-xs text-slate-500 mt-4">fuzzy Mamdani</p>
+                            <div class="card p-4">
+                                <p class="text-xs text-[var(--color-text-muted)] mb-2">Skor Risiko</p>
+                                <p class="text-2xl font-bold text-[var(--color-aman)]">45</p>
+                                <p class="text-xs text-[var(--color-text-muted)] mt-4">fuzzy Mamdani</p>
                             </div>
                         </div>
 
                         <!-- Metrics Row 2 -->
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                <p class="text-slate-400 text-xs mb-2">Laju Kenaikan</p>
-                                <p class="text-xl font-bold">-5.02 <span class="text-sm text-slate-400">cm/jam</span></p>
-                                <p class="text-xs text-slate-500 mt-2">positif = naik</p>
+                            <div class="card p-4">
+                                <p class="text-xs text-[var(--color-text-muted)] mb-2">Laju Kenaikan</p>
+                                <p class="text-xl font-bold">-5.02 <span class="text-sm text-[var(--color-text-muted)]">cm/jam</span></p>
+                                <p class="text-xs text-[var(--color-text-muted)] mt-2">positif = naik</p>
                             </div>
 
-                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                                <p class="text-slate-400 text-xs mb-2">Onshore Wind</p>
-                                <p class="text-xl font-bold">2.43 <span class="text-sm text-slate-400">m/s</span></p>
+                            <div class="card p-4">
+                                <p class="text-xs text-[var(--color-text-muted)] mb-2">Onshore Wind</p>
+                                <p class="text-xl font-bold">2.43 <span class="text-sm text-[var(--color-text-muted)]">m/s</span></p>
                             </div>
                         </div>
 
                         <!-- Mini Chart -->
-                        <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-                            <p class="text-slate-400 text-xs mb-3">Prediksi 2 Jam</p>
+                        <div class="card p-4">
+                            <p class="text-xs text-[var(--color-text-muted)] mb-3">Prediksi 2 Jam</p>
                             <div class="h-12 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-green-500/20 rounded flex items-end justify-between px-2 gap-1">
                                 <div class="w-1 bg-blue-500 h-6 rounded-sm"></div>
                                 <div class="w-1 bg-blue-500 h-7 rounded-sm"></div>
@@ -149,13 +150,13 @@
                                 <div class="w-1 bg-cyan-500 h-9 rounded-sm"></div>
                                 <div class="w-1 bg-green-500 h-10 rounded-sm"></div>
                             </div>
-                            <p class="text-xs text-slate-500 mt-2">Linear Regression - 8 titik proyeksi</p>
+                            <p class="text-xs text-[var(--color-text-muted)] mt-2">Linear Regression - 8 titik proyeksi</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Floating badge -->
-                <div class="absolute -top-3 -right-3 px-4 py-2 bg-gradient-to-r from-cyan-500 to-green-500 rounded-lg text-white text-sm font-bold">
+                <div class="absolute -top-3 -right-3 px-4 py-2 gradient-btn rounded-lg text-white text-sm font-bold">
                     🚀 Live Data
                 </div>
             </div>
