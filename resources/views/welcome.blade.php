@@ -29,9 +29,9 @@
             <a href="/" class="text-2xl font-bold gradient-text">EWS</a>
 
             <nav class="hidden lg:flex items-center gap-8">
+                <a href="#tentang" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Tentang</a>
                 <a href="#fitur" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Fitur</a>
-                <a href="#bagaimana" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Bagaimana</a>
-                <a href="#harga" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Harga</a>
+                <a href="#prediksi" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Prediksi</a>
                 <a href="#faq" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">FAQ</a>
             </nav>
 
@@ -164,10 +164,10 @@
     </section>
 
     <!-- Features Section -->
-    <section id="fitur" class="py-20 lg:py-32 px-6 lg:px-8 border-t border-slate-800">
+    <section id="tentang" class="py-20 lg:py-32 px-6 lg:px-8 border-t border-slate-800">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-4xl lg:text-5xl font-bold font-display mb-4">Fitur Unggulan</h2>
+                <h2 class="text-4xl lg:text-5xl font-bold font-display mb-4">Tentang EWS</h2>
                 <p class="text-lg text-slate-400 max-w-2xl mx-auto">Semua yang Anda butuhkan untuk monitoring dan prediksi banjir rob</p>
             </div>
 
@@ -218,10 +218,10 @@
     </section>
 
     <!-- How It Works -->
-    <section id="bagaimana" class="py-20 lg:py-32 px-6 lg:px-8 border-t border-slate-800">
+    <section id="fitur" class="py-20 lg:py-32 px-6 lg:px-8 border-t border-slate-800">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-4xl lg:text-5xl font-bold font-display mb-4">Bagaimana Cara Kerjanya</h2>
+                <h2 class="text-4xl lg:text-5xl font-bold font-display mb-4">Fitur Unggulan</h2>
                 <p class="text-lg text-slate-400 max-w-2xl mx-auto">3 langkah sederhana untuk mulai melindungi wilayah Anda</p>
             </div>
 
@@ -253,11 +253,11 @@
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section id="harga" class="py-20 lg:py-32 px-6 lg:px-8 border-t border-slate-800">
+    <!-- Prediksi Section -->
+    <section id="prediksi" class="py-20 lg:py-32 px-6 lg:px-8 border-t border-slate-800">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-4xl lg:text-5xl font-bold font-display mb-4">Harga Transparan</h2>
+                <h2 class="text-4xl lg:text-5xl font-bold font-display mb-4">Paket & Harga</h2>
                 <p class="text-lg text-slate-400 max-w-2xl mx-auto">Mulai gratis, upgrade saat Anda siap</p>
             </div>
 
