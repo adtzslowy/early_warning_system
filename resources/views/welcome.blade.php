@@ -52,47 +52,111 @@
             <div class="absolute bottom-0 left-0 w-96 h-96 bg-green-500 rounded-full mix-blend-screen filter blur-3xl opacity-20"></div>
         </div>
 
-        <div class="max-w-5xl mx-auto text-center space-y-8">
-            <div class="inline-block px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-sm font-semibold">
-                ⚡ Prediksi Banjir Rob Real-time
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            <!-- Left: Content -->
+            <div class="space-y-8">
+                <div class="inline-block px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-sm font-semibold">
+                    ⚡ Prediksi Banjir Rob Real-time
+                </div>
+
+                <h1 class="text-5xl lg:text-6xl font-black font-display leading-tight">
+                    Lindungi Wilayah Ketapang dari <span class="gradient-text">Banjir Rob</span>
+                </h1>
+
+                <p class="text-lg text-slate-300 leading-relaxed">
+                    Sistem peringatan dini berbasis teknologi OLS regression dan Fuzzy Logic untuk memprediksi risiko banjir rob dengan akurasi tinggi. Dapatkan alert real-time dan ambil keputusan lebih cepat.
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="px-8 py-4 gradient-btn rounded-lg font-bold text-center transition">
+                            Buka Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('register') }}" class="px-8 py-4 gradient-btn rounded-lg font-bold text-center transition">
+                            Mulai Gratis
+                        </a>
+                        <a href="#fitur" class="px-8 py-4 border border-slate-600 rounded-lg font-bold text-center hover:border-slate-400 transition">
+                            Pelajari Lebih Lanjut
+                        </a>
+                    @endauth
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-4 pt-8 border-t border-slate-800">
+                    <div class="text-center">
+                        <p class="text-2xl font-bold gradient-text">24/7</p>
+                        <p class="text-slate-400 text-xs mt-2">Monitoring</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold gradient-text">4 Jam</p>
+                        <p class="text-slate-400 text-xs mt-2">Prediksi</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold gradient-text">< 5s</p>
+                        <p class="text-slate-400 text-xs mt-2">Alert</p>
+                    </div>
+                </div>
             </div>
 
-            <h1 class="text-5xl lg:text-7xl font-black font-display leading-tight">
-                Lindungi Wilayah Ketapang dari <span class="gradient-text">Banjir Rob</span>
-            </h1>
+            <!-- Right: Dashboard Preview -->
+            <div class="relative">
+                <div class="card-glass rounded-xl overflow-hidden border border-slate-700">
+                    <div class="bg-slate-900 p-6 border-b border-slate-700">
+                        <p class="text-sm text-slate-400">Dashboard Preview</p>
+                        <h3 class="text-xl font-bold mt-2">Rob Ketapang - Muara</h3>
+                    </div>
 
-            <p class="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                Sistem peringatan dini berbasis teknologi OLS regression dan Fuzzy Logic untuk memprediksi risiko banjir rob dengan akurasi tinggi. Dapatkan alert real-time dan ambil keputusan lebih cepat.
-            </p>
+                    <!-- Dashboard Content -->
+                    <div class="p-6 space-y-4">
+                        <!-- Metrics Row 1 -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                <p class="text-slate-400 text-xs mb-2">Ketinggian Air</p>
+                                <p class="text-2xl font-bold">45.7 <span class="text-sm text-slate-400">cm</span></p>
+                                <div class="mt-3 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full"></div>
+                                <p class="text-xs text-slate-500 mt-2">⚠️ Waspada</p>
+                            </div>
 
-            <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                @auth
-                    <a href="{{ route('dashboard') }}" class="px-8 py-4 gradient-btn rounded-lg font-bold text-center transition">
-                        Buka Dashboard
-                    </a>
-                @else
-                    <a href="{{ route('register') }}" class="px-8 py-4 gradient-btn rounded-lg font-bold text-center transition">
-                        Mulai Gratis
-                    </a>
-                    <a href="#fitur" class="px-8 py-4 border border-slate-600 rounded-lg font-bold text-center hover:border-slate-400 transition">
-                        Pelajari Lebih Lanjut
-                    </a>
-                @endauth
-            </div>
+                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                <p class="text-slate-400 text-xs mb-2">Skor Risiko</p>
+                                <p class="text-2xl font-bold text-green-400">45</p>
+                                <p class="text-xs text-slate-500 mt-4">fuzzy Mamdani</p>
+                            </div>
+                        </div>
 
-            <!-- Stats -->
-            <div class="grid md:grid-cols-3 gap-8 pt-12 border-t border-slate-800">
-                <div class="text-center">
-                    <p class="text-3xl font-bold gradient-text">24/7</p>
-                    <p class="text-slate-400 text-sm mt-2">Monitoring Real-time</p>
+                        <!-- Metrics Row 2 -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                <p class="text-slate-400 text-xs mb-2">Laju Kenaikan</p>
+                                <p class="text-xl font-bold">-5.02 <span class="text-sm text-slate-400">cm/jam</span></p>
+                                <p class="text-xs text-slate-500 mt-2">positif = naik</p>
+                            </div>
+
+                            <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                                <p class="text-slate-400 text-xs mb-2">Onshore Wind</p>
+                                <p class="text-xl font-bold">2.43 <span class="text-sm text-slate-400">m/s</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Mini Chart -->
+                        <div class="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+                            <p class="text-slate-400 text-xs mb-3">Prediksi 2 Jam</p>
+                            <div class="h-12 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-green-500/20 rounded flex items-end justify-between px-2 gap-1">
+                                <div class="w-1 bg-blue-500 h-6 rounded-sm"></div>
+                                <div class="w-1 bg-blue-500 h-7 rounded-sm"></div>
+                                <div class="w-1 bg-cyan-500 h-8 rounded-sm"></div>
+                                <div class="w-1 bg-cyan-500 h-9 rounded-sm"></div>
+                                <div class="w-1 bg-green-500 h-10 rounded-sm"></div>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">Linear Regression - 8 titik proyeksi</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center">
-                    <p class="text-3xl font-bold gradient-text">4 Jam</p>
-                    <p class="text-slate-400 text-sm mt-2">Prediksi Akurat</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-3xl font-bold gradient-text">< 5 Detik</p>
-                    <p class="text-slate-400 text-sm mt-2">Notifikasi Alert</p>
+
+                <!-- Floating badge -->
+                <div class="absolute -top-3 -right-3 px-4 py-2 bg-gradient-to-r from-cyan-500 to-green-500 rounded-lg text-white text-sm font-bold">
+                    🚀 Live Data
                 </div>
             </div>
         </div>
