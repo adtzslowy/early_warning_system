@@ -130,6 +130,30 @@
                         </div>
                     </x-card>
 
+                    {{-- Notifikasi Telegram --}}
+                    <x-card title="Notifikasi Telegram" subtitle="Terima alert banjir rob melalui Telegram">
+                        <p class="mb-4 text-sm text-[var(--color-text-muted)]">
+                            Masukkan Chat ID Telegram Anda untuk menerima notifikasi alert real-time ketika ada perubahan level risiko banjir rob.
+                        </p>
+
+                        <div>
+                            <label for="telegram_chat_id" class="mb-1.5 block text-sm font-medium">Chat ID Telegram</label>
+                            <input type="text" name="telegram_chat_id" id="telegram_chat_id"
+                                value="{{ $user->telegram_chat_id }}"
+                                placeholder="Contoh: 123456789"
+                                class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-sm outline-none transition-colors focus-visible:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]">
+                            <p class="mt-2 text-xs text-[var(--color-text-muted)]">
+                                📱 <strong>Cara mendapatkan Chat ID:</strong><br>
+                                1. Buka Telegram dan cari bot: <code class="bg-[var(--color-surface-2)] px-1 py-0.5 rounded">@getidsbot</code><br>
+                                2. Kirim pesan <code class="bg-[var(--color-surface-2)] px-1 py-0.5 rounded">/start</code><br>
+                                3. Bot akan menampilkan Chat ID Anda (nomor panjang)
+                            </p>
+                            @error('telegram_chat_id')
+                                <p class="mt-1 text-sm text-[var(--color-bahaya)]">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </x-card>
+
                     <div class="flex items-center justify-end gap-3">
                         <x-button href="{{ route('dashboard') }}" variant="outline">Batal</x-button>
                         <x-button type="submit" variant="primary">Simpan Profil</x-button>
