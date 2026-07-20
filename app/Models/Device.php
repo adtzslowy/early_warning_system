@@ -203,6 +203,11 @@ class Device extends Model
         return $this->belongsToMany(User::class)->withTimestamps();
     }
 
+    public function users(): BelongsToMany
+    {
+        return $this->operators();
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->hasRole("admin")) {

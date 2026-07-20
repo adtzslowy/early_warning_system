@@ -121,13 +121,14 @@ Schedule::command('devices:sync-from-rob')
  * Interval: Setiap 1 jam
  * Purpose: Hangatkan cache BMKG untuk generator data sintetis (demo/dev only)
  * Note: Disable di production jika tidak perlu synthetic data
+ * Status: DISABLED - BMKG API sering 403, gunakan real sensor data
  */
-Schedule::command(RefreshBmkgMaritime::class)
-    ->hourly()
-    ->withoutOverlapping()
-    ->onSuccess(function () {
-        \Illuminate\Support\Facades\Log::channel('scheduler')->info('✅ bmkg:maritime completed');
-    });
+// Schedule::command(RefreshBmkgMaritime::class)
+//     ->hourly()
+//     ->withoutOverlapping()
+//     ->onSuccess(function () {
+//         \Illuminate\Support\Facades\Log::channel('scheduler')->info('✅ bmkg:maritime completed');
+//     });
 
 // ─────────────────────────────────────────────────────────────────────────
 // 4. MAINTENANCE & CLEANUP (Optional - Uncomment jika perlu)
