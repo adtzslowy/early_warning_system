@@ -83,10 +83,14 @@
                         @foreach ($notifications as $notification)
                             <tr class="hover:bg-[var(--color-hover)]">
                                 <td class="px-4 py-3">
-                                    <a href="{{ route('dashboard', ['device' => $notification->device->device_code]) }}"
-                                        class="font-medium text-[var(--color-accent)] hover:underline">
-                                        {{ $notification->device->device_code }}
-                                    </a>
+                                    @if ($notification->device)
+                                        <a href="{{ route('dashboard', ['device' => $notification->device->device_code]) }}"
+                                            class="font-medium text-[var(--color-accent)] hover:underline">
+                                            {{ $notification->device->device_code }}
+                                        </a>
+                                    @else
+                                        <span class="text-[var(--color-text-muted)]">Device deleted</span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 font-mono text-sm">
                                     {{ $notification->telegram_chat_id ?? '-' }}
