@@ -101,8 +101,12 @@ class TelegramService
         }
     }
 
-    private function formatAlertMessage(Device $device, string $riskLevel, string $message, $predictions = null): string
+    private function formatAlertMessage(?Device $device, string $riskLevel, string $message, $predictions = null): string
     {
+        if (!$device) {
+            return "❌ Error: Device not found\n\nRisk Level: {$riskLevel}\nMessage: {$message}";
+        }
+
         $riskEmoji = match ($riskLevel) {
             'aman' => '✅',
             'waspada' => '⚠️',
