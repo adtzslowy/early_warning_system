@@ -25,12 +25,21 @@ class TelegramService
         $users = $device->users;
         $notificationLogs = [];
 
+        // Get latest predictions untuk include di notif
+        $predictions = $device->predictions()
+            ->whereIn('horizon_minutes', [30, 60, 120, 240])
+            ->where('created_at', '>=', now()->subHours(1))
+            ->orderBy('horizon_minutes')
+            ->get();
+
+        $predictions = $predictions->isNotEmpty() ? $predictions->keyBy('horizon_minutes') : collect();
+
         foreach ($users as $user) {
             if (empty($user->telegram_chat_id)) {
                 continue;
             }
 
-            $telegramMessage = $this->formatAlertMessage($device, $riskLevel, $message);
+            $telegramMessage = $this->formatAlertMessage($device, $riskLevel, $message, $predictions);
 
             $notificationLog = NotificationLog::create([
                 'device_id' => $device->id,
@@ -93,7 +102,7 @@ class TelegramService
         }
     }
 
-    private function formatAlertMessage(Device $device, string $riskLevel, string $message): string
+    private function formatAlertMessage(Device $device, string $riskLevel, string $message, $predictions = null): string
     {
         $riskEmoji = match ($riskLevel) {
             'aman' => '✅',
@@ -105,13 +114,38 @@ class TelegramService
 
         $time = now()->timezone('Asia/Jakarta')->format('d M Y H:i');
 
-        return "<b>{$riskEmoji} ALERT BANJIR ROB</b>\n\n" .
-               "<b>Perangkat:</b> {$device->device_code} - {$device->name}\n" .
-               "<b>Lokasi:</b> {$device->location}\n" .
-               "<b>Level Risiko:</b> <b>{$riskLevel}</b>\n" .
-               "<b>Pesan:</b> {$message}\n" .
-               "<b>Waktu:</b> {$time}\n\n" .
-               "🔗 <a href=\"" . route('dashboard', ['device' => $device->device_code]) . "\">Lihat Detail</a>";
+        $currentLevel = $device->latestWaterLevel?->value ?? 'N/A';
+        if ($currentLevel !== 'N/A') {
+            $currentLevel = round((float) $currentLevel, 2) . 'm';
+        }
+
+        $alertMsg = "<b>{$riskEmoji} ALERT BANJIR ROB</b>\n\n" .
+                   "<b>Perangkat:</b> {$device->device_code} - {$device->name}\n" .
+                   "<b>Lokasi:</b> {$device->location}\n" .
+                   "<b>Level Risiko Saat Ini:</b> <b>{$riskLevel}</b>\n" .
+                   "<b>Ketinggian Air Saat Ini:</b> {$currentLevel}\n" .
+                   "<b>Pesan:</b> {$message}\n" .
+                   "<b>Waktu:</b> {$time}\n\n";
+
+        // Add predictions jika ada
+        if ($predictions && $predictions->isNotEmpty()) {
+            $alertMsg .= "<b>📈 Prediksi 4 Jam ke Depan:</b>\n";
+
+            foreach ([30, 60, 120, 240] as $horizon) {
+                $pred = $predictions->get($horizon);
+                if ($pred) {
+                    $predValue = round((float) $pred->predicted_value, 2);
+                    $predTime = $pred->predicted_at->timezone('Asia/Jakarta')->format('H:i');
+                    $alertMsg .= "  • {$horizon}min ({$predTime}): <b>{$predValue}m</b>\n";
+                }
+            }
+
+            $alertMsg .= "\n";
+        }
+
+        $alertMsg .= "🔗 <a href=\"" . route('dashboard', ['device' => $device->device_code]) . "\">Lihat Detail & Prediksi</a>";
+
+        return $alertMsg;
     }
 
     private function handleError(NotificationLog $notificationLog, string $errorMessage): void
