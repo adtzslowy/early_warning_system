@@ -19,7 +19,8 @@
       "Bash(~/.luna/bin/php /usr/local/bin/composer remove laravel/reverb --no-interaction)",
       "Bash(~/.luna/bin/php artisan *)",
       "Bash(git ls-remote *)",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(php artisan *)"
     ]
   }
 }

@@ -21,6 +21,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/tentang', function () {
+    return view('landing.tentang');
+})->name('tentang');
+
 // Endpoint IoT TIRUAN (demo/skripsi) — publik & tanpa auth agar bisa di-poll
 // oleh RobSyncService seperti API IoT asli. Nonaktif di production (lihat
 // config/synthetic.php). Arahkan IOT_KETAPANG_URL ke sini HANYA untuk demo.
