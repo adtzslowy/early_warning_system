@@ -29,6 +29,7 @@
             <a href="/" class="text-2xl font-bold gradient-text">EWS</a>
 
             <nav class="hidden lg:flex items-center gap-8">
+                <a href="{{ route('beranda') }}" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Beranda</a>
                 <a href="{{ route('tentang') }}" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Tentang</a>
                 <a href="#fitur" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Fitur</a>
                 <a href="#prediksi" class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition">Prediksi</a>
