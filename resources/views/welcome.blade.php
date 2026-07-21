@@ -56,12 +56,9 @@
         <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
             <!-- Left: Content -->
             <div class="space-y-8">
-                <div class="inline-block px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-sm font-semibold">
-                    ⚡ Prediksi Banjir Rob Real-time
-                </div>
 
                 <h1 class="text-5xl lg:text-6xl font-black font-display leading-tight">
-                    Lindungi Wilayah Ketapang dari <span class="gradient-text">Banjir Rob</span>
+                    Lindungi Wilayah Anda dari <span class="gradient-text">Banjir Rob</span>
                 </h1>
 
                 <p class="text-lg text-slate-300 leading-relaxed">
